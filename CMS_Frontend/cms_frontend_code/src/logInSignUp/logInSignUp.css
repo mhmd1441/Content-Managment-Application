@@ -1,0 +1,140 @@
+.auth-box {
+  display: flex;
+  flex-direction: row;
+  width: 900px;
+  height: 600px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background-color: white;
+}
+
+
+
+.auth-left, .auth-right {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.auth-left {
+  width: 50%;
+  background-color: white;
+  padding: 40px;
+}
+
+.auth-right {
+  width: 50%;
+  background: linear-gradient(to bottom right, #3b82f6, #1e40af); /* blue gradient */
+  color: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-title {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2563eb;
+  text-align: center;
+}
+
+.auth-subtitle {
+  margin-bottom: 40px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.auth-link {
+  color: #2563eb;
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.auth-footer {
+  margin-top: 40px;
+}
+
+.auth-footer .auth-btn {
+  width: auto;
+  padding: 10px 20px;
+  background-color: white;
+  color: #2563eb;
+  border: 2px solid white;
+}
+
+.auth-footer .auth-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: white;
+}
+.submit-btn, .switch-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover, .switch-btn:hover {
+  background-color:#111;
+}
+.input-field {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #3b3b3b;
+  border-radius: 6px;
+  background-color: #2c2c34;
+  color: white;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.input-field::placeholder {
+  color: #ccc;
+}
+
+.link-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.link-btn:hover {
+  background-color: #111;
+}
