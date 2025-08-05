@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -16,8 +16,8 @@ class Department extends Model
         'city',
         'director_id',
     ];
-    public function director(): HasOne
+    public function director(): BelongsTo
     {
-        return $this->HasOne(User::class, 'director_id');
+        return $this->belongsTo(User::class, 'director_id');
     }
 }

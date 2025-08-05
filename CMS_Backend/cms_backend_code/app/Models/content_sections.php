@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class content_sections extends Model
 {
@@ -14,16 +14,19 @@ class content_sections extends Model
         'order',
         'is_expanded',
         'status',
+        'published_at',
         'parent_id',
-        'menu_id'
-
+        'menu_id',
+        'created_by',
+        'updated_by'
     ];
-    public function menu(): HasOne
+    public function menu(): BelongsTo
     {
-        return $this->HasOne(Menu::class, 'menu_id');
+        return $this->belongsTo(Menu::class, 'menu_id');
     }
-    public function parent(): HasOne
+
+    public function parent(): BelongsTo
     {
-        return $this->HasOne(Menu::class, 'parent_id');
+        return $this->belongsTo(content_sections::class, 'parent_id');
     }
 }
