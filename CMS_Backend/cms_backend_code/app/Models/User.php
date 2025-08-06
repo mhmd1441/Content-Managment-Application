@@ -6,10 +6,11 @@ use App\Models\Department;
 use Illuminate\Database\Eloquent\Relations\belongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     protected $fillable = [
         'first_name',
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'department_id',
         'supervisor_id'
     ];
+    protected $hidden = ['password', 'remember_token'];
     protected function casts(): array
     {
         return [
