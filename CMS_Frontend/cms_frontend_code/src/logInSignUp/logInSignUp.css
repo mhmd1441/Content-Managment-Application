@@ -9,6 +9,13 @@
   background-color: white;
 }
 
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+    font-weight: bold;
+}
 
 
 .auth-left, .auth-right {
@@ -28,7 +35,7 @@
 
 .auth-right {
   width: 50%;
-  background: linear-gradient(to bottom right, #3b82f6, #1e40af); /* blue gradient */
+  background: linear-gradient(to bottom right, #3b82f6, #1e40af);
   color: white;
   padding: 40px;
   display: flex;

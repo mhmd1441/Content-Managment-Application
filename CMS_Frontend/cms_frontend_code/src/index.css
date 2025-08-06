@@ -20,7 +20,16 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #1e1e1e; /* optional: dark bg */
+  background-color: #1e1e1e;
+}
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.App {
+  height: 100%;
+  overflow-y: auto;
 }
 
 a {
