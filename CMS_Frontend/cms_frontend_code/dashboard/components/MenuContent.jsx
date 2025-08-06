@@ -5,19 +5,22 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
-import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import Content from '@mui/icons-material/ContentCopyOutlined';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
-
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import AssignmentTurnedInRoundedIcon from '@mui/icons-material/AssignmentTurnedInRounded';
+import DraftsRoundedIcon from '@mui/icons-material/DraftsRounded';
 const mainListItems = [
   { text: 'Analytics', icon: <AnalyticsRoundedIcon /> },
-  { text: 'Menu', icon: <AnalyticsRoundedIcon /> },
-  { text: 'Content Section', icon: <PeopleRoundedIcon /> },
-  { text: 'Tasks', icon: <AssignmentRoundedIcon /> },
+  { text: 'Menu', icon: <MenuRoundedIcon /> },
+  { text: 'Content Section', icon: <Content /> },
+  { text: 'Tasks', icon: <PeopleRoundedIcon /> },
+  { text: 'Published', icon: <AssignmentTurnedInRoundedIcon /> },
+  { text: 'Drafts', icon: <DraftsRoundedIcon /> },
 ];
 
 const secondaryListItems = [

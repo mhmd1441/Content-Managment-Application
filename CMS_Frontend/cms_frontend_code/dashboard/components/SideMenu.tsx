@@ -22,7 +22,7 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-export default function SideMenu() {
+export default function SideMenu({ currentUser }) {
   return (
     <Drawer
       variant="permanent"
@@ -52,28 +52,19 @@ export default function SideMenu() {
       >
         <MenuContent />
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: 'center',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
+      <Stack direction="row" sx={{ p: 2, gap: 1, alignItems: 'center', borderTop: '1px solid', borderColor: 'divider' }}>
         <Avatar
           sizes="small"
-          alt="Riley Carter"
+          alt={currentUser?.first_name + " " + currentUser?.last_name}
           src="/static/images/avatar/7.jpg"
           sx={{ width: 36, height: 36 }}
         />
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            Riley Carter
+            {currentUser?.first_name} {currentUser?.last_name}
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            riley@email.com
+            {currentUser?.email}
           </Typography>
         </Box>
         <OptionsMenu />
