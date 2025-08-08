@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
 
 class AuthController extends Controller
 {
@@ -38,40 +36,29 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $fields = $request->validate([
+        $request->validate([
             'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($fields)) {
-            return response([
-                'message' => 'Invalid credentials',
-            ], 401);
+        if (!\Illuminate\Support\Facades\Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
+        $request->session()->regenerate();
 
-        $user = Auth::user();
-
-        $token = $user->createToken('authToken')->plainTextToken;
-
-        return response([
-            'user' => $user,
-            'token' => $token,
-        ], 200);
+        return response()->json(['message' => 'Logged in'], 200);
     }
 
     public function me(Request $request)
     {
         return response()->json($request->user());
     }
-    public function logout(Request $request): RedirectResponse
+    public function logout(Request $request)
     {
-        Auth::logout();
+        \Illuminate\Support\Facades\Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('auth.login')->with([
-            'message' => 'You have been logged out successfully.',
-            'title' => 'Logout Successful !',
-        ]);
+        return response()->json(['message' => 'Logged out']);
     }
     // public function forgotPassword(Request $request): RedirectResponse
     // {

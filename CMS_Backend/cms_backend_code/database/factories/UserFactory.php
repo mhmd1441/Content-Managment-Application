@@ -1,13 +1,12 @@
 <?php
 
 namespace Database\Factories;
-
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -29,20 +28,11 @@ class UserFactory extends Factory
             'job_title'   => fake()->jobTitle(),
             'phone_number' => fake()->phoneNumber(),
             'status'      => fake()->randomElement(['active', 'inactive', 'suspended']),
-            'role'        => fake()->randomElement(['full-access', 'view-only']),
+            'role'        => fake()->randomElement(['super_admin', 'business_admin', 'business_user']),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'email_verified_at' => null,
-        ]);
-    }
 }
