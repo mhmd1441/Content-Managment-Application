@@ -1,80 +1,80 @@
+import React, { useState } from "react";
 import "./logInSignUp.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { login } from "../services/auth";
-import axiosInstance from "../lib/axios";
+import { useAuth } from "../auth/AuthContext";
 
-export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+
+
+  export default function Login() {
+    const navigate = useNavigate();
+    const { login } = useAuth();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
   const handleLogin = async () => {
-  if (!email.trim() || !password.trim()) {
-    setError("Both email and password are required.");
-    return;
-  }
+    if (!email.trim() || !password.trim()) return setError("Both email and password are required.");
 
-  try {
-    const response = await login(email, password);
-    const token = response.data.token;
+    try {
+      const user = await login(email, password);
 
-    localStorage.setItem("token", token);
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const rolePaths = {
+        super_admin: "/super_dashboard",
+        business_admin: "/business_dashboard",
+        business_user: "/user_dashboard",
+      };
 
-    navigate("/dashboard");
-  } catch (err) {
-    if (err.response && err.response.status === 401) {
-      setError("Invalid email or password.");
-    } else {
-      setError("An error occurred. Please try again.");
+      if (rolePaths[user.role]) return navigate(rolePaths[user.role]);
+      setError("Unknown role. Access denied.");
+    } catch (err) {
+      setError("Session error – please reload and log in again.");
+      console.error("/me error:", err);
     }
-  }
-};
+  };
 
-  return (
-    <div className="auth-wrapper">
-      <div className="auth-box">
-        <div className="auth-left">
-          <h2 className="auth-title">Log In</h2>
-          <p className="or-text">or use your email and password</p>
 
-          {/* Error Message */}
-          {error && <div className="error-message">{error}</div>}
+    return (
+      <div className="auth-wrapper">
+        <div className="auth-box">
+          <div className="auth-left">
+            <h2 className="auth-title">Log In</h2>
+            <p className="or-text">or use your email and password</p>
 
-          <input
-            type="email"
-            placeholder="Email"
-            className="input-field"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="input-field"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            {/* Error Message */}
+            {error && <div className="error-message">{error}</div>}
 
-          <div className="options-row">
-            <button className="link-btn">Forgot Your Password?</button>
+            <input
+              type="email"
+              placeholder="Email"
+              className="input-field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="input-field"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <div className="options-row">
+              <button className="link-btn">Forgot Your Password?</button>
+            </div>
+
+            <button type="button" className="submit-btn" onClick={handleLogin}>
+              Log In
+            </button>
           </div>
 
-          <button type="button" className="submit-btn" onClick={handleLogin}>
-            Log In
-          </button>
-        </div>
-
-        <div className="auth-right">
-          <h2>Welcome Back!</h2>
-          <p>Log in to access your account and continue where you left off.</p>
-          <button className="switch-btn" onClick={() => navigate("/signup")}>
-            Go to SIGN IN
-          </button>
+          <div className="auth-right">
+            <h2>Welcome Back!</h2>
+            <p>Log in to access your account and continue where you left off.</p>
+            <button className="switch-btn" onClick={() => navigate("/signup")}>
+              Go to SIGN IN
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

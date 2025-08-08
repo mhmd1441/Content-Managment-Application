@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./logInSignUp.css";
-import { register } from "../services/auth";
+import { register, initCsrf } from "../services/api";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -33,15 +33,8 @@ export default function SignUp() {
   }
 
   try {
-    await register({
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      job_title: formData.jobTitle,
-      phone_number: formData.phoneNumber,
-      email: formData.email,
-      password: formData.password,
-      password_confirmation: formData.password,
-    });
+    await initCsrf();
+    await register(formData);
 
     navigate("/login");
   } catch (err) {
