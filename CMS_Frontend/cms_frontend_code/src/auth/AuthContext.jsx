@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(true);
 
-  // Hydrate on mount (handles hard refresh)
   useEffect(() => {
     (async () => {
       try {

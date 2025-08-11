@@ -1,0 +1,126 @@
+/* -------- Business UI theme helpers -------- */
+:root {
+  --bd-bg: radial-gradient(1200px 800px at 20% -10%, rgba(120,120,120,0.08), transparent 60%),
+           radial-gradient(1000px 700px at 100% 10%, rgba(120,120,120,0.06), transparent 55%);
+  --bd-card: rgba(24,24,27,0.75);
+  --bd-card-border: #2a2a2f;
+  --bd-card-hover: #323238;
+  --bd-muted: #a1a1aa;
+  --bd-ink: #e5e7eb;
+}
+html, body, #root { height: 100%; width: 100%; }
+
+
+.bd-wrap { 
+  min-height: 100vh; 
+  width: 100%; 
+}
+
+.bd-topbar {
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.bd-topbar-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Section container (nice max width + breathing room) */
+.bd-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Hero header used on list pages */
+.bd-hero {
+  margin-bottom: 12px;
+}
+.bd-eyebrow {
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+}
+.bd-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--bd-ink);
+  margin-top: 4px;
+}
+
+/* Cards */
+.bd-card {
+  background: var(--bd-card);
+  border: 1px solid var(--bd-card-border);
+  border-radius: 14px;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  will-change: transform;
+}
+.bd-card:hover {
+  border-color: var(--bd-card-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+/* Subtle separator */
+.bd-sep {
+  border-top: 1px solid var(--bd-card-border);
+}
+
+/* Two-column content rows */
+.bd-content-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .bd-content-row {
+    grid-template-columns: 1.2fr .8fr;
+  }
+}
+
+/* Image holder */
+.bd-img {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 180px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--bd-card-border);
+  background: rgba(15,15,17,0.7);
+}
+.bd-img img {
+  max-height: 168px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Tiny pill used for meta */
+.bd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 999px;
+  background: rgba(99,102,241,0.12);
+  color: #c7c9ff;
+  border: 1px solid rgba(99,102,241,0.22);
+}
+
+/* Nicer scrollbar (optional) */
+.bd-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a42 transparent;
+}
+.bd-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.bd-scroll::-webkit-scrollbar-thumb { background: #3a3a42; border-radius: 8px; }
+.bd-scroll::-webkit-scrollbar-track { background: transparent; }
