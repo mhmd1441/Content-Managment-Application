@@ -55,10 +55,11 @@ class AuthController extends Controller
     }
     public function logout(Request $request)
     {
-        \Illuminate\Support\Facades\Auth::guard('web')->logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return response()->json(['message' => 'Logged out']);
+
+        return response()->noContent(); // 204
     }
     // public function forgotPassword(Request $request): RedirectResponse
     // {
