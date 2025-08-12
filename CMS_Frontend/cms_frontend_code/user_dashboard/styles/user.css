@@ -1,0 +1,143 @@
+:root {
+  --ud-bg: #f6f9ff;
+  --ud-surface: #ffffff;
+  --ud-border: #e6eaf2;
+  --ud-text: #111827;
+  --ud-muted: #6b7280;
+  --ud-primary-1: #1e3a8a;   
+  --ud-primary-2: #2563eb;   
+  --ud-primary-3: #60a5fa;   
+  --ud-shadow: 0 6px 18px rgba(2, 17, 79, 0.06);
+}
+
+.user-theme {
+  --ud-bg: #f6f9ff;
+  --ud-surface: #ffffff;
+  --ud-border: #e6eaf2;
+  --ud-text: #111827;
+  --ud-muted: #6b7280;
+  --ud-primary-1: #1e3a8a;
+  --ud-primary-2: #2563eb;
+  --ud-primary-3: #60a5fa;
+  --ud-shadow: 0 6px 18px rgba(2, 17, 79, 0.06);
+
+  min-height: 100vh;
+  color: var(--ud-text);
+  background: var(--ud-bg);
+}
+.user-theme .ud-wrap { min-height: 100vh; width: 100%; background: var(--ud-bg); }
+.user-theme .ud-main { width: 100%; display: flex; flex-direction: column; }
+.user-theme  .ud-topbar {
+  background: linear-gradient(90deg, var(--ud-primary-1) 0%, var(--ud-primary-2) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.18);
+  position: sticky; top: 0; z-index: 50;
+}
+.user-theme .ud-topbar-inner {
+  max-width: 1320px; margin: 0 auto; height: 64px;
+  display: flex; align-items: center; padding: 0 20px;
+}
+.user-theme .ud-brand {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+}
+.user-theme .ud-brand-badge {
+  height: 34px; width: 34px; border-radius: 10px;
+  background: #fff; color: var(--ud-primary-2);
+  display: grid; place-items: center; font-weight: 900; letter-spacing: .5px;
+  box-shadow: var(--ud-shadow);
+}
+.user-theme .ud-brand-text { color: #fff; font-weight: 700; letter-spacing: .4px; }
+
+/* Right icon group */
+.user-theme .ud-iconbar a { color: #eef2ff; opacity: .9; }
+.user-theme .ud-iconbar a:hover { opacity: 1; }
+
+.user-theme .ud-container { width: 100%; max-width: 1320px; margin: 0 auto; padding: 20px; }
+
+/* ======= Carousel (shorter, wider) ======= */
+.user-theme .ud-carousel { position: relative; overflow: hidden; border-radius: 14px; border: 1px solid var(--ud-border); background: var(--ud-surface); box-shadow: var(--ud-shadow); }
+.user-theme .ud-carousel-track { display: flex; transition: transform .35s ease; }
+.user-theme .ud-carousel-slide { min-width: 100%; height: 400px;  align-items: center; justify-content: center; }
+.user-theme .ud-carousel-slide img { width: 100%; height: 100%; display: flex;object-fit: cover; }
+.user-theme .ud-carousel-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(17,24,39,.7); color: #fff; border: 1px solid rgba(255,255,255,.22);
+  width: 38px; height: 38px; border-radius: 999px; display: grid; place-items: center;
+}
+
+.user-theme .ud-carousel-btn:hover { background: rgba(17,24,39,.88); }
+.user-theme .ud-prev { left: 10px; } .user-theme .ud-next { right: 10px; }
+.user-theme .ud-dots { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; gap: 6px; justify-content: center; }
+.user-theme .ud-dot { width: 8px; height: 8px; border-radius: 999px; background: #c7d2fe; opacity: .6; }
+.user-theme .ud-dot.active { background: #3b82f6; opacity: 1; }
+
+.user-theme .ud-eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ud-muted); }
+.user-theme .ud-title { font-size: 24px; font-weight: 800; color: #0f172a; }
+
+.user-theme .ud-menubar {
+  background: var(--ud-surface); border: 1px solid var(--ud-border); border-radius: 12px;
+  padding: 8px 46px; position: relative; box-shadow: var(--ud-shadow);
+}
+.user-theme .ud-menubar-rail {
+  display: flex; gap: 10px; overflow-x: auto; scrollbar-width: thin; scroll-behavior: smooth;
+}
+.user-theme .ud-menubar-rail::-webkit-scrollbar { height: 8px; }
+.user-theme .ud-menubar-rail::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 999px; }
+
+.user-theme .ud-chip {
+  background: #eef2ff; color: #1e3a8a; border: 1px solid #c7d2fe;
+  padding: 8px 12px; border-radius: 10px; font-weight: 600; white-space: nowrap;
+}
+.user-theme .ud-chip:hover { background: #dbeafe; }
+
+.user-theme .ud-arrow {
+  position: absolute; top: 8px; bottom: 8px; width: 36px; display: grid; place-items: center;
+  background: linear-gradient(90deg, rgba(255,255,255,1) 60%, rgba(255,255,255,0));
+  color: var(--ud-primary-2); cursor: pointer;
+}
+.user-theme .ud-arrow.right { right: 6px; transform: scaleX(-1); }
+.user-theme .ud-arrow.left  { left:  6px; }
+
+.user-theme .ud-children {
+  margin-top: 10px; padding: 10px; background: var(--ud-surface);
+  border: 1px solid var(--ud-border); border-radius: 12px; box-shadow: var(--ud-shadow);
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px;
+}
+@media (max-width: 900px){ .user-theme .ud-children { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 640px){ .user-theme .ud-children { grid-template-columns: 1fr; } }
+
+.user-theme .ud-child {
+  display: block; border: 1px solid var(--ud-border); background: #fafbff;
+  padding: 10px 12px; border-radius: 10px; text-decoration: none; color: var(--ud-text);
+}
+.user-theme .ud-child:hover { border-color: #c7d2fe; background: #eef2ff; }
+
+.user-theme .ud-card { background: var(--ud-surface); border: 1px solid var(--ud-border); border-radius: 14px; box-shadow: var(--ud-shadow); }
+.user-theme .ud-pill { display:inline-flex; gap:6px; padding:2px 8px; font-size:11px; border-radius:999px; background:#e9f0ff; color:#234395; border:1px solid #cfe0ff; }
+
+.user-theme .ud-img { display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--ud-border); background:#fff; border-radius:10px; padding:6px; height: 180px; }
+.user-theme .ud-img img { max-height: 168px; width: auto; object-fit: contain; }
+
+.user-theme .ud-expand-btn {
+  background: #eef2ff; color: #1e3a8a; border: 1px solid #c7d2fe;
+  padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+}
+.user-theme .ud-expand-btn:hover { background: #e0e7ff; }
+
+.user-theme .ud-sep { height:1px; background: var(--ud-border); }
+
+
+
+/*UserHeader*/
+.ud-brand-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: var(--ud-shadow);
+}
+
+.ud-brand { gap: 10px; }
+
+.ud-iconbar { gap: 14px; }
+/*End UserHeader-----------------*/

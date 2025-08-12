@@ -208,10 +208,8 @@ export default function DepartmentList() {
               <TableHead>Name</TableHead>
               <TableHead>Country</TableHead>
               <TableHead>City</TableHead>
-              <TableHead>Created By</TableHead>
               <TableHead>Updated By</TableHead>
               <TableHead>Director ID</TableHead>
-              <TableHead>Created At</TableHead>
               <TableHead>Updated At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -237,16 +235,10 @@ export default function DepartmentList() {
                   {fmt(r.city)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
-                  {fmt(r.created_by)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
                   {fmt(r.updated_by)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.director_id)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.created_at)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.updated_at)}

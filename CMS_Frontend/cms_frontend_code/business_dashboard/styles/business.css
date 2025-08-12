@@ -38,6 +38,15 @@ html, body, #root { height: 100%; width: 100%; }
   padding: 24px;
 }
 
+/* 2-line clamp without needing the Tailwind plugin */
+.bd-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
 /* Hero header used on list pages */
 .bd-hero {
   margin-bottom: 12px;

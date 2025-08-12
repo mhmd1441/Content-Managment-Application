@@ -6,22 +6,22 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import GroupIcon from '@mui/icons-material/Group';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import MenuIcon from '@mui/icons-material/Menu';
+import SourceIcon from '@mui/icons-material/Source';
+
 
 const mainListItems = [
-  { text: 'Analytics',        icon: <AnalyticsRoundedIcon />,    path: '/super_dashboard' },
-  { text: 'Menus',            icon: <MenuRoundedIcon />,         path: '/super_dashboard/menu' },
-  { text: 'Content Sections', icon: <ContentCopyOutlinedIcon />, path: '/super_dashboard/content-section' },
-  { text: 'Department',       icon: <ApartmentIcon />,           path: '/super_dashboard/Department' },
-  { text: 'Users',            icon: <GroupIcon />,               path: '/super_dashboard/user' },
+  { text: 'Add Menu', icon: <MenuIcon />, path: '/business_dashboard/addMenu' },
+  { text: 'Add Content Section', icon: <SourceIcon />, path: '/business_dashboard/addContentSection' },
 ];
 
 const secondaryListItems = [
-
+  { text: 'Settings', icon: <SettingsRoundedIcon />, path: '/business_dashboard/Menu/LeftMenu/settings' },
+  { text: 'About',    icon: <InfoRoundedIcon />,     path: '/business_dashboard/Menu/LeftMenu/about' },
+  { text: 'Feedback', icon: <HelpRoundedIcon />,     path: '/business_dashboard/Menu/LeftMenu/feedback' },
 ];
 
 export default function LeftMenu() {

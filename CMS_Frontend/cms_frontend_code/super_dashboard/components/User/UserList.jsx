@@ -220,9 +220,6 @@ export default function UserList() {
               <TableHead>Updated By</TableHead>
               <TableHead>Supervisor ID</TableHead>
               <TableHead>Department ID</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
-              <TableHead>Email Verified At</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -279,15 +276,6 @@ export default function UserList() {
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.department_id)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.created_at || r["created._at"])}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.updated_at)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.email_verified_at || r["email_verified_ at"])}
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.role)}

@@ -5,6 +5,7 @@ import AppTheme from "../shared-theme/AppTheme";
 import { Outlet } from "react-router-dom";
 import "./styles/business.css";
 import { Link } from "react-router-dom";
+import SideMenu from "./pages/Menu/SideMenu.jsx";
 
 import {
   NavigationMenu,
@@ -20,11 +21,11 @@ export default function BusinessDashboard(props) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
 
-      {/* Make the outer shell take the full viewport width/height */}
       <Box
         className="bd-wrap"
-        sx={{ display: "flex", minHeight: "100vh", width: "100%" }}
+        sx={{ display: "flex"}}
       >
+        <SideMenu />
         <Box
           component="main"
           className="bd-scroll"
@@ -33,13 +34,12 @@ export default function BusinessDashboard(props) {
             display: "flex",
             flexDirection: "column",
             minHeight: 0,
-            width: "100%", // <<< important
-            alignItems: "stretch", // <<< important
+            width: "100%",
+            alignItems: "stretch",
           }}
         >
           <AppNavbar />
 
-          {/* Top nav (optional) */}
           <Box className="bd-topbar">
             <div className="bd-topbar-inner">
               <NavigationMenu>
@@ -81,7 +81,6 @@ export default function BusinessDashboard(props) {
             </div>
           </Box>
 
-          {/* Page content */}
           <Box
             sx={{
               flex: 1,
