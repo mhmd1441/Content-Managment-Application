@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Department;
 use App\Models\User;
+use App\Models\contentSection;
+use App\Models\Menu;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,5 +24,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory(10)->create();
         Department::factory(10)->create();
+        Menu::factory(10)->create();
+        ContentSection::factory(15)->create();
     }
 }

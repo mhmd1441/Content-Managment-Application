@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\content_sections;
+use App\Models\contentSection;
 use App\Traits\API_response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Response;
@@ -16,8 +16,8 @@ class ContentSectionApiController extends Controller
 
     public function index()
     {
-        $data = content_sections::all();
-        return $this->sendResponse("List of all content_sections", $data);
+        $data = contentSection::all();
+        return $this->sendResponse("List of all contentSection", $data);
     }
 
     public function store(Request $request)
@@ -30,7 +30,7 @@ class ContentSectionApiController extends Controller
             'is_expanded'   => 'required|boolean',
             'status'        => 'required|in:draft,published,archived',
             'published_at'  => 'required|date',
-            'parent_id'     => 'nullable|exists:content_sections,id',
+            'parent_id'     => 'nullable|exists:contentSection,id',
             'menu_id'       => 'required|exists:menus,id',
         ]);
 
@@ -40,7 +40,7 @@ class ContentSectionApiController extends Controller
 
         $userId = Auth::id();
 
-        $obj = new content_sections([
+        $obj = new contentSection([
             'subtitle'      => $request->subtitle,
             'description'   => $request->description,
             'image_path'    => $request->image_path,
@@ -61,11 +61,11 @@ class ContentSectionApiController extends Controller
 
     public function show($id)
     {
-        $obj = content_sections::find($id);
+        $obj = contentSection::find($id);
         if (!$obj) {
-            return $this->sendError("content_sections Not Found", [], Response::HTTP_BAD_REQUEST);
+            return $this->sendError("contentSection Not Found", [], Response::HTTP_BAD_REQUEST);
         }
-        return $this->sendResponse("content_sections information", $obj, Response::HTTP_OK);
+        return $this->sendResponse("contentSection information", $obj, Response::HTTP_OK);
     }
 
     public function update(Request $request, $id)
@@ -78,7 +78,7 @@ class ContentSectionApiController extends Controller
             'is_expanded'   => 'sometimes|required|boolean',
             'status'        => 'sometimes|required|in:draft,published,archived',
             'published_at'  => 'sometimes|required|date',
-            'parent_id'     => 'nullable|exists:content_sections,id',
+            'parent_id'     => 'nullable|exists:contentSection,id',
             'menu_id'       => 'sometimes|required|exists:menus,id',
         ]);
 
@@ -86,7 +86,7 @@ class ContentSectionApiController extends Controller
             return $this->sendError("Failure", $validator->errors());
         }
 
-        $obj = content_sections::find($id);
+        $obj = contentSection::find($id);
         if (!$obj) {
             return $this->sendError("Id does not exist", [], Response::HTTP_BAD_REQUEST);
         }
@@ -111,13 +111,13 @@ class ContentSectionApiController extends Controller
 
     public function destroy($id)
     {
-        $obj = content_sections::find($id);
+        $obj = contentSection::find($id);
         if (!$obj) {
             return $this->sendError("Id does not exist", [], Response::HTTP_BAD_REQUEST);
         }
 
         $obj->delete();
 
-        return $this->sendResponse("content_sections deleted Successfully", []);
+        return $this->sendResponse("contentSection deleted Successfully", []);
     }
 }

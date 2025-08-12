@@ -27,5 +27,17 @@ class MenuSeeder extends Seeder
             'status' => 'published',
             'parent_id' => $parentMenu->id,
         ]);
+
+        $parents = Menu::factory()
+            ->count(5)
+            ->sequence(fn($s) => ['order' => $s->index + 1, 'parent_id' => null])
+            ->create();
+
+        foreach ($parents as $p) {
+            Menu::factory()
+                ->count(rand(2, 4))
+                ->sequence(fn($s) => ['order' => $s->index + 1, 'parent_id' => $p->id])
+                ->create();
+        }
     }
 }

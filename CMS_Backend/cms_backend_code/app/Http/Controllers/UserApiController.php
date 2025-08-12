@@ -129,4 +129,26 @@ class UserApiController extends Controller
 
         return $this->sendResponse("User deleted Successfully", []);
     }
+    public function total()
+    {
+        return User::all()->count();
+    }
+    public function search(Request $request)
+    {
+        $user = Auth::user();
+        $name = $request->input('name');
+        $email = $request->input('email');
+
+        $query = User::query();
+        if ($name) {
+            $query->where('name', 'like', "%{$name}%");
+        }
+
+        if ($email) {
+            $query->where('email', 'like', "%{$email}%");
+        }
+
+        $data = $query->get();
+    }
+
 }

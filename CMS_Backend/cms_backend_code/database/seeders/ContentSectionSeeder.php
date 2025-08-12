@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\content_sections;
+use App\Models\ContentSection;
 use App\Models\Menu;
 
 class ContentSectionSeeder extends Seeder
@@ -15,7 +15,7 @@ class ContentSectionSeeder extends Seeder
     {
         $menu = Menu::where('route', '/productsAndServices')->first();
 
-        $parentcontent = content_sections::create([
+        $parentcontent = ContentSection::create([
             'subtitle' => 'E-Sim',
             'description' => 'This project implements an eSIM (embedded SIM) management system that allows users to activate, switch, and manage mobile network profiles digitally without needing a physical SIM card. It enhances flexibility, supports multiple profiles, and streamlines mobile connectivity through a secure and user-friendly platform.',
             'image_path' => null,
@@ -25,7 +25,7 @@ class ContentSectionSeeder extends Seeder
             'menu_id' => $menu->id,
         ]);
 
-        content_sections::create([
+        ContentSection::create([
             'subtitle' => 'E-Sim Procedure',
             'description' => 'The eSIM (Embedded SIM) activation procedure involves digitally provisioning a mobile network profile without the need for a physical SIM card. The process begins by scanning a QR code or entering activation details provided by the telecom operator. Once verified, the eSIM profile is securely downloaded and installed on the device. Users can then manage multiple profiles, switch networks, or activate plans directly through the device settings. This digital approach streamlines the onboarding process, reduces physical logistics, and enhances user flexibility and mobility.',
             'image_path' => 'img/ESim.png',
@@ -34,5 +34,16 @@ class ContentSectionSeeder extends Seeder
             'status' => 'published',
             'parent_id' => $parentcontent->id,
         ]);
+
+        $childMenus = Menu::whereNotNull('parent_id')->get();
+        foreach ($childMenus as $m) {
+            ContentSection::factory()
+                ->count(rand(2,5))
+                ->sequence(fn($s) => [
+                    'order'   => $s->index + 1,
+                    'menu_id' => $m->id,
+                ])
+                ->create();
+        }
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('content_sections', function (Blueprint $table) {
+        Schema::create('contentSection', function (Blueprint $table) {
             $table->id();
             $table->string('subtitle');
             $table->longText('description')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('published_at')->nullable();
-            $table->foreignId('parent_id')->nullable()->constrained('content_sections')->onDelete('set null');
+            $table->foreignId('parent_id')->nullable()->constrained('contentSection')->onDelete('set null');
             $table->foreignId('menu_id')->constrained('menus')->onDelete('cascade');
             $table->timestamps();
         });
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('content_sections');
+        Schema::dropIfExists('contentSection');
     }
 };
