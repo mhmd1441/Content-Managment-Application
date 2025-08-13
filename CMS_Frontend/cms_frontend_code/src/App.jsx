@@ -1,5 +1,5 @@
 import React from "react";
-import Login from "./logInSignUp/Login.jsx";
+import Login from "./logIn/Login.jsx";
 import ContentSectionList from "../super_dashboard/components/contentSectionList.jsx";
 import {
   BrowserRouter as Router,

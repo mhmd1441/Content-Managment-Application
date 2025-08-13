@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { UserRound, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import "../styles/user.css";
 import TouchLogo from "@/assets/TouchLogo.png";
 import {
@@ -10,10 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-
-
-
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export default function UserHeader() {
   return (
@@ -31,9 +28,11 @@ export default function UserHeader() {
           <span className="ud-brand-text">Touch</span>
         </Link>
 
-        <nav className="ud-iconbar ml-auto flex items-center gap-4">
+        <nav className="ud-iconbar  backgro ml-auto flex items-center gap-4">
           <DropdownMenu>
-            <DropdownMenuTrigger><AccountCircleIcon/></DropdownMenuTrigger>
+            <DropdownMenuTrigger>
+              <AccountCircleIcon />
+            </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />

@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useAuth } from "../../../src/auth/AuthContext";
 import LeftMenu from "./leftMenu/LeftMenu.jsx";
+import OptionsMenu from "./leftMenu/Option/OptionsMenu.jsx";
 
 const drawerWidth = 240;
 
@@ -82,6 +83,7 @@ export default function SideMenu() {
               {currentUser?.email}
             </Typography>
           </Box>
+          <OptionsMenu />
         </Stack>
       </Drawer>
   );
