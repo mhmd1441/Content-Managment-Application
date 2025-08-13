@@ -14,6 +14,7 @@ class Menu extends Model
         'route',
         'order',
         'status',
+        'position',
         'published_at',
         'parent_id',
         'created_by',

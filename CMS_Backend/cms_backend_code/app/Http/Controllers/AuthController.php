@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -36,17 +37,47 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        if (!\Illuminate\Support\Facades\Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Normalize and check status
+        $status = strtolower((string) ($user->status ?? ''));
+        if ($status !== 'active') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return response()->json(['message' => 'Account is locked. Contact your administration.'], 403);
+        }
+
         $request->session()->regenerate();
 
-        return response()->json(['message' => 'Logged in'], 200);
+        $rolePaths = [
+            'super_admin'    => '/super_dashboard',
+            'business_admin' => '/business_dashboard',
+            'business_user'  => '/user_dashboard',
+        ];
+
+        $redirect = $rolePaths[$user->role] ?? null;
+
+        return response()->json([
+            'message'  => 'Logged in',
+            'redirect' => $redirect, // frontend just uses this
+            'user'     => [
+                'id'    => $user->id,
+                'role'  => $user->role,
+                'email' => $user->email,
+                'name'  => trim(($user->first_name ?? '').' '.($user->last_name ?? '')),
+            ],
+        ], 200);
     }
 
     public function me(Request $request)

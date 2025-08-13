@@ -25,7 +25,7 @@ class ContentSectionFactory extends Factory
             'description'  => $this->faker->paragraphs(mt_rand(1, 3), true),
             'image_path'   => implode(',', $imgs),
             'order'        => $this->faker->numberBetween(1, 20),
-            'is_expanded'  => $this->faker->boolean(30),
+            'expand_mode'   => $this->faker->randomElement(['expanded','collapsed','free']),
             'status'       => $this->faker->randomElement(['draft','published','archived']),
             'published_at' => $this->faker->optional(0.6)->dateTimeBetween('-1 year','now'),
             'parent_id'    => null,

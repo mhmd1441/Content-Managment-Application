@@ -12,7 +12,7 @@ class ContentSection extends Model
     protected $table = 'contentSection';
 
     protected $fillable = [
-        'subtitle','description','image_path','order','is_expanded','status',
+        'subtitle','description','image_path','order','expand_mode','status',
         'published_at','parent_id','menu_id','created_by','updated_by',
     ];
     public function menu(): BelongsTo

@@ -20,6 +20,7 @@ class MenuFactory extends Factory
             'order'       => $this->faker->numberBetween(1, 50),
             'parent_id'   => null,
             'status'      => $this->faker->randomElement(['draft','published','archived']),
+            'position' => $this->faker->randomElement(['top','left']),
             'published_at'=> $this->faker->optional(0.5)->dateTimeBetween('-1 year','now'),
         ];
     }

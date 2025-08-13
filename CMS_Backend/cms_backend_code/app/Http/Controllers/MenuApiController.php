@@ -26,6 +26,7 @@ class MenuApiController extends Controller
             'route'        => 'required|string|max:255',
             'order'        => 'required|integer',
             'status'       => 'required|in:draft,published,archived',
+            'position'     => 'required|in:top,left',
             'published_at' => 'required|date',
             'parent_id'    => 'nullable|exists:menus,id',
         ]);
@@ -43,6 +44,7 @@ class MenuApiController extends Controller
             'status'       => $request->status,
             'published_at' => $request->published_at,
             'parent_id'    => $request->parent_id,
+            'position'     => $request->position,
             'created_by'   => $userId,
             'updated_by'   => $userId,
         ]);
@@ -69,6 +71,7 @@ class MenuApiController extends Controller
             'route'        => 'sometimes|required|string|max:255',
             'order'        => 'sometimes|required|integer',
             'status'       => 'sometimes|required|in:draft,published,archived',
+            'position'     => 'required|in:top,left',
             'published_at' => 'sometimes|required|date',
             'parent_id'    => 'nullable|exists:menus,id',
         ]);
@@ -87,6 +90,7 @@ class MenuApiController extends Controller
             'route',
             'order',
             'status',
+            'position'     => 'required|in:top,left',
             'published_at',
             'parent_id'
         ]));

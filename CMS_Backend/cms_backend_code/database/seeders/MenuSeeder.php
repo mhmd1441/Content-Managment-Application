@@ -16,6 +16,7 @@ class MenuSeeder extends Seeder
             'title' => 'Product And Services',
             'route' => '/productsAndServices',
             'order' => 1,
+            'position'     => 'top',
             'status' => 'published',
             'parent_id' => null,
         ]);
@@ -25,6 +26,7 @@ class MenuSeeder extends Seeder
             'route' => '/projects',
             'order' => 2,
             'status' => 'published',
+            'position'     =>'top',
             'parent_id' => $parentMenu->id,
         ]);
 
