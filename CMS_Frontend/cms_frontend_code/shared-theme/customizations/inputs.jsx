@@ -8,8 +8,8 @@ import CheckBoxOutlineBlankRoundedIcon from '@mui/icons-material/CheckBoxOutline
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import { gray, brand } from '../themePrimitives';
+import { Check, Minus, Square, ChevronsUpDown } from "lucide-react";
 
-/* eslint-disable import/prefer-default-export */
 export const inputsCustomizations = {
   MuiButtonBase: {
     defaultProps: {
@@ -48,7 +48,7 @@ export const inputsCustomizations = {
               size: 'medium',
             },
             style: {
-              height: '2.5rem', // 40px
+              height: '40px',
             },
           },
           {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, getMenus } from "../../src/services/api";
-import Loader from "../../src/lib/loading.jsx";
+import { initCsrf, getMenus } from "../../../src/services/api.js";
+import Loader from "../../../src/lib/loading.jsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

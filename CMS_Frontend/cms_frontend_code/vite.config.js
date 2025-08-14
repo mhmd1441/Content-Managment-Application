@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename)
 
 export default defineConfig({
   plugins: [react(),tailwindcss()],
+  build: { sourcemap: true },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

@@ -3,6 +3,9 @@ import "./LogIn.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import touchLogo from "../assets/TouchLogo.png";
+import { initCsrf } from "../services/api";
+
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +18,7 @@ export default function Login() {
     if (!email.trim() || !password.trim())
       return setError("Both email and password are required.");
     try {
+      await initCsrf();
       const user = await login(email, password);
       const rolePaths = {
         super_admin: "/super_dashboard",
@@ -23,11 +27,11 @@ export default function Login() {
       };
       if (rolePaths[user.role]) return navigate(rolePaths[user.role]);
       setError("Unknown role. Access denied.");
-    } catch (err) {
-      setError("Session error – please reload and log in again.");
-      console.error("/me error:", err);
-    }
-  };
+    }  catch (err) {
+    setError("Session error – please reload and log in again.");
+    console.error("/me error:", err);
+  }
+};
 
   return (
     <div className="auth-wrapper">

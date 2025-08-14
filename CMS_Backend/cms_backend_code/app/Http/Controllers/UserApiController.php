@@ -132,6 +132,9 @@ class UserApiController extends Controller
     public function total()
     {
         return User::all()->count();
+        {
+
+        }
     }
     public function search(Request $request)
     {

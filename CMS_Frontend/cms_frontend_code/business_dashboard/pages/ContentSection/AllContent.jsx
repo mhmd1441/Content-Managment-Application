@@ -6,8 +6,7 @@ import {
 } from "../../../src/services/api";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import SortIcon from "@mui/icons-material/Sort";
+import { Filter, ArrowUpDown } from "lucide-react";
 
 const fmt = (v) => v ?? "—";
 
@@ -71,7 +70,6 @@ export default function BusinessAllContent() {
 
   return (
     <div className="bd-container space-y-5">
-      {/* Tiny CSS needed for 2-line clamp (kept inline so you don’t miss it) */}
       <style>{`
         .bd-line-clamp-2 {
           display: -webkit-box;
@@ -81,7 +79,6 @@ export default function BusinessAllContent() {
         }
       `}</style>
 
-      {/* Hero row: text left, icons right */}
       <div
         className="bd-hero"
         style={{
@@ -96,12 +93,11 @@ export default function BusinessAllContent() {
         </div>
 
         <div className="flex items-center gap-3">
-          <FilterAltIcon className="cursor-pointer opacity-80 hover:opacity-100" />
-          <SortIcon className="cursor-pointer opacity-80 hover:opacity-100" />
+          <Filter  className="cursor-pointer opacity-80 hover:opacity-100" />
+          <ArrowUpDown  className="cursor-pointer opacity-80 hover:opacity-100" />
         </div>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-neutral-500" />
         <Input
