@@ -20,6 +20,11 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class])->group(function ()
         Route::put('/update_user/{id}', [UserApiController::class, 'update']);
         Route::delete('/delete_user/{id}', [UserApiController::class, 'destroy']);
 
+        //Queries Related To User
+        Route::get('/get_new_users', [UserApiController::class, 'newUsersThisMonth']);
+        Route::get('/get_total_users', [UserApiController::class, 'total']);
+
+
         Route::get('/get_departments', [DepartmentApiController::class, 'index']);
         Route::post('/save_department', [DepartmentApiController::class, 'store']);
         Route::get('/show_department/{id}', [DepartmentApiController::class, 'show']);

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-
+use Carbon\Carbon;
 class UserApiController extends Controller
 {
     use API_response;
@@ -153,5 +153,18 @@ class UserApiController extends Controller
 
         $data = $query->get();
     }
+
+
+    public function newUsersThisMonth()
+    {
+        $now = Carbon::now();
+
+        $count = User::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+
+        return response()->json(['count' => $count]);
+    }
+
 
 }
