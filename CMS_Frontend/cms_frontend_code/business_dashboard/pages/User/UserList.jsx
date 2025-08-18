@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, get_users, save_user, update_user, delete_user, get_departments } from "../../../src/services/api";
+import { initCsrf, get_users , get_departments } from "../../../src/services/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 
 const fmt = (v) => (v ?? "—");
 
@@ -23,7 +22,6 @@ export default function UserList() {
   const [role, setRole] = useState("all");
 
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
   const emptyForm = { first_name:"", last_name:"", job_title:"", phone_number:"", email:"", password:"", status:"active", supervisor_id:"", department_id:"", role:"user" };
   const [form, setForm] = useState(emptyForm);
 
@@ -47,93 +45,38 @@ export default function UserList() {
     }
   };
 
-  useEffect(() => {
-    if (did.current) return;
-    did.current = true;
-    load();
-  }, []);
+    useEffect(() => {
+      if (did.current) return;
+      did.current = true;
+      load();
+    }, []);
 
-  const filtered = useMemo(() => {
-    let r = rows.slice();
-    if (q.trim()) {
-      const needle = q.toLowerCase();
-      r = r.filter(x =>
-        String(x.id).includes(needle) ||
-        x.first_name?.toLowerCase?.().includes(needle) ||
-        x.last_name?.toLowerCase?.().includes(needle) ||
-        x.email?.toLowerCase?.().includes(needle) ||
-        x.phone_number?.toLowerCase?.().includes(needle) ||
-        x.job_title?.toLowerCase?.().includes(needle)
-      );
-    }
-    if (status !== "all") r = r.filter(x => (x.status || "").toLowerCase() === status);
-    if (role !== "all") r = r.filter(x => (x.role || "").toLowerCase() === role);
-    return r;
-  }, [rows, q, status, role]);
-
-  const openCreate = () => {
-    setEditing(null);
-    setForm(emptyForm);
-    setOpen(true);
-  };
-
-  const openEdit = (u) => {
-    setEditing(u);
-    setForm({
-      first_name: u.first_name || "",
-      last_name: u.last_name || "",
-      job_title: u.job_title || "",
-      phone_number: u.phone_number || "",
-      email: u.email || "",
-      password: "", // leave empty unless changing
-      status: u.status || "active",
-      supervisor_id: u.supervisor_id || "",
-      department_id: u.department_id || "",
-      role: u.role || "user",
-    });
-    setOpen(true);
-  };
-
-  const submit = async () => {
-    const payload = { ...form };
-    if (editing && !payload.password) delete payload.password; // avoid wiping password
-    try {
-      if (editing) await update_user(editing.id, payload);
-      else await save_user(payload);
-      setOpen(false);
-      await load();
-    } catch (e) {
-      console.error(e);
-      alert("Save failed. Check console.");
-    }
-  };
-
-  const remove = async (id) => {
-    if (!confirm("Delete this user?")) return;
-    try {
-      await delete_user(id);
-      await load();
-    } catch (e) {
-      console.error(e);
-      alert("Delete failed.");
-    }
-  };
+    const filtered = useMemo(() => {
+      let r = rows.slice();
+      if (q.trim()) {
+        const needle = q.toLowerCase();
+        r = r.filter(x =>
+          String(x.id).includes(needle) ||
+          x.first_name?.toLowerCase?.().includes(needle) ||
+          x.last_name?.toLowerCase?.().includes(needle) ||
+          x.email?.toLowerCase?.().includes(needle) ||
+          x.phone_number?.toLowerCase?.().includes(needle) ||
+          x.job_title?.toLowerCase?.().includes(needle)
+        );
+      }
+      if (status !== "all") r = r.filter(x => (x.status || "").toLowerCase() === status);
+      if (role !== "all") r = r.filter(x => (x.role || "").toLowerCase() === role);
+      return r;
+    }, [rows, q, status, role]);
 
   if (loading) return <div className="p-6 text-sm text-neutral-300">Loading users…</div>;
   if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
 
-  // filter option sets
   const roleSet = new Set(rows.map(r => (r.role || "").toLowerCase()).filter(Boolean));
   const statusSet = new Set(rows.map(r => (r.status || "").toLowerCase()).filter(Boolean));
 
   return (
     <div className="bd-container space-y-5">
-      <div className="bd-hero">
-        <div className="bd-eyebrow">Users</div>
-        <h1 className="bd-title">All Users</h1>
-      </div>
-
-      {/* toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative w-full sm:max-w-xs">
@@ -157,10 +100,6 @@ export default function UserList() {
             </SelectContent>
           </Select>
         </div>
-
-        <Button onClick={openCreate} className="bg-neutral-800 hover:bg-neutral-700">
-          <Plus className="mr-2 h-4 w-4" /> Add User
-        </Button>
       </div>
 
       {/* table */}
@@ -228,9 +167,6 @@ export default function UserList() {
       {/* dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[560px]">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Edit User" : "Add User"}</DialogTitle>
-          </DialogHeader>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
             <Input placeholder="First name" value={form.first_name} onChange={e => setForm(f => ({...f, first_name: e.target.value}))} />
@@ -238,11 +174,6 @@ export default function UserList() {
             <Input placeholder="Email" type="email" className="sm:col-span-2" value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} />
             <Input placeholder="Phone number" value={form.phone_number} onChange={e => setForm(f => ({...f, phone_number: e.target.value}))} />
             <Input placeholder="Job title" value={form.job_title} onChange={e => setForm(f => ({...f, job_title: e.target.value}))} />
-
-            {!editing && (
-              <Input placeholder="Password" type="password" className="sm:col-span-2" value={form.password} onChange={e => setForm(f => ({...f, password: e.target.value}))} />
-            )}
-
             <Select value={String(form.status)} onValueChange={v => setForm(f => ({...f, status: v}))}>
               <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
@@ -270,10 +201,6 @@ export default function UserList() {
 
             <Input placeholder="Supervisor ID (optional)" value={form.supervisor_id} onChange={e => setForm(f => ({...f, supervisor_id: e.target.value}))} />
           </div>
-
-          <DialogFooter>
-            <Button onClick={submit}>{editing ? "Save changes" : "Create user"}</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

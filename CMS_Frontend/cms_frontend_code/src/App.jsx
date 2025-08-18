@@ -11,6 +11,7 @@ import Department from "../super_dashboard/components/DepartmentList.jsx";
 import Feedback from "../business_dashboard/pages/Menu/leftMenu/feedback.jsx";
 import Settings from "../business_dashboard/pages/Menu/leftMenu/settings.jsx";
 import About from "../business_dashboard/pages/Menu/leftMenu/about.jsx";
+import AnalyticsDashboard from "../business_dashboard/Analytics.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import BusinessMenus from "../business_dashboard/pages/Menu/BusinessMenus.jsx";
 import BusinessMenuDetail from "../business_dashboard/pages/Menu/BusinessMenuDetail.jsx";
@@ -61,6 +62,7 @@ export default function App() {
           }
         >
           <Route index element={<BusinessMenus />} />
+          <Route path="analyticsDashboard" element={<AnalyticsDashboard />} />
           <Route path="addContentSection" element={<AddContentSection />} />
           <Route path="addMenu" element={<AddMenu />} />
           <Route path="settings" element={<Settings />} />

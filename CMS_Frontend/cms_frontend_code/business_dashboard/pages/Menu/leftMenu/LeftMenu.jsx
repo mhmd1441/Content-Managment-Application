@@ -11,9 +11,10 @@ import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import MenuIcon from '@mui/icons-material/Menu';
 import SourceIcon from '@mui/icons-material/Source';
-
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 const mainListItems = [
+  { text: 'Analytics', icon: <AnalyticsIcon />, path: '/business_dashboard/analyticsDashboard' },
   { text: 'Add Menu', icon: <MenuIcon />, path: '/business_dashboard/addMenu' },
   { text: 'Add Content Section', icon: <SourceIcon />, path: '/business_dashboard/addContentSection' },
 ];

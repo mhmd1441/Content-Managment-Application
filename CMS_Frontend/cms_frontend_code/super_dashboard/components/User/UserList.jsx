@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, get_users } from "../../../src/services/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom"; // ✅ correct import for the hook
+import {
+  initCsrf,
+  get_users,
+  get_new_users,
+  get_total_users,
+  delete_user,
+} from "../../../src/services/api";
+import StatCard from "../StatCard.jsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,10 +40,15 @@ const fmt = (v) =>
   v === null || v === undefined || v === "" ? "—" : String(v);
 
 export default function UserList() {
+  const navigate = useNavigate(); // ✅ hook must be inside a component
+
   const [rowsRaw, setRowsRaw] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const did = useRef(false);
+
+  const [newUsers, setNewUsers] = useState(0);
+  const [totalUser, setTotalUsers] = useState(0);
 
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
@@ -45,24 +57,60 @@ export default function UserList() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(new Set());
 
+  // --- load function so we can reuse after delete ---
+  const load = async () => {
+    setLoading(true);
+    try {
+      await initCsrf();
+      const res = await get_users();
+      const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setRowsRaw(arr);
+      setErr(null);
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to load Users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- stats ---
+  useEffect(() => {
+    get_new_users()
+      .then((res) => setNewUsers(res?.data?.count ?? 0))
+      .catch(() => setNewUsers(0));
+  }, []);
+
+  useEffect(() => {
+    get_total_users()
+      .then((res) => {
+        const d = res?.data;
+        const total =
+          (typeof d === "number" && d) ||
+          d?.count ||
+          d?.total ||
+          d?.data?.total ||
+          d?.meta?.total ||
+          0;
+        setTotalUsers(Number(total));
+      })
+      .catch(() => setTotalUsers(0));
+  }, []);
+
+  // --- initial fetch once ---
   useEffect(() => {
     if (did.current) return;
     did.current = true;
-    (async () => {
-      try {
-        await initCsrf();
-        const res = await get_users();
-        const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setRowsRaw(arr);
-      } catch (e) {
-        console.error(e);
-        setErr("Failed to load Users");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // --- derived totals ---
+  const totalUsersDerived = useMemo(() => rowsRaw.length, [rowsRaw]);
+  const totalUsersDisplay =
+    totalUsersDerived > 0 ? totalUsersDerived : totalUser;
+
+  // --- filters & paging ---
   const rows = useMemo(() => {
     let r = rowsRaw.slice();
     if (q.trim()) {
@@ -99,6 +147,42 @@ export default function UserList() {
     });
   };
 
+  const maskPwd = (p) => (p ? "••••••••" : "—");
+
+  // --- row actions (INSIDE component so they see navigate/load state) ---
+  const handleUpdate = (id) => {
+    if (!id) return;
+    navigate(`/users/edit/${id}`);
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) return alert("Missing user id.");
+    if (!window.confirm("Delete this user?")) return;
+    try {
+      await initCsrf();          // fresh CSRF cookie
+      await delete_user(id);     // DELETE /api/delete_user/:id
+      await load();              // refresh rows
+    } catch (e) {
+      console.error(e);
+      alert(e?.response?.data?.message || "Delete failed.");
+    }
+  };
+
+  const cards = [
+    {
+      title: "New Users This Month",
+      value: String(newUsers),
+      trend: "up",
+      data: [],
+    },
+    {
+      title: "Total Users",
+      value: String(totalUsersDisplay),
+      trend: "up",
+      data: [],
+    },
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24" aria-busy="true">
@@ -108,7 +192,6 @@ export default function UserList() {
   }
   if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
 
-  // for filters
   const roleSet = new Set(
     rowsRaw.map((r) => (r.role || "").toLowerCase()).filter(Boolean)
   );
@@ -116,23 +199,18 @@ export default function UserList() {
     rowsRaw.map((r) => (r.status || "").toLowerCase()).filter(Boolean)
   );
 
-  const maskPwd = (p) => (p ? "••••••••" : "—");
-
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Total Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {rows.length}
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid grid-cols-12 gap-4 mb-4">
+        {cards.map((card, index) => (
+          <div key={index} className="col-span-12 sm:col-span-6 lg:col-span-3">
+            <StatCard {...card} />
+          </div>
+        ))}
       </div>
 
+      {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative w-full sm:max-w-xs">
@@ -189,21 +267,23 @@ export default function UserList() {
           </Select>
         </div>
 
-        <Button className="bg-neutral-800 hover:bg-neutral-700">
+        <Button
+          className="bg-neutral-800 hover:bg-neutral-700"
+          onClick={() => navigate("/users/new")}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Create User
         </Button>
       </div>
 
+      {/* Table */}
       <div className="rounded-lg border border-neutral-800 bg-neutral-950/60 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-10">
                 <Checkbox
-                  checked={
-                    current.length > 0 && selected.size === current.length
-                  }
+                  checked={current.length > 0 && selected.size === current.length}
                   onCheckedChange={(v) => toggleAll(Boolean(v))}
                   aria-label="Select all on page"
                 />
@@ -235,23 +315,13 @@ export default function UserList() {
                   />
                 </TableCell>
                 <TableCell className="text-neutral-300">{fmt(r.id)}</TableCell>
-                <TableCell className="text-neutral-200">
-                  {fmt(r.first_name)}
-                </TableCell>
-                <TableCell className="text-neutral-200">
-                  {fmt(r.last_name)}
-                </TableCell>
+                <TableCell className="text-neutral-200">{fmt(r.first_name)}</TableCell>
+                <TableCell className="text-neutral-200">{fmt(r.last_name)}</TableCell>
+                <TableCell className="text-neutral-300">{fmt(r.job_title)}</TableCell>
+                <TableCell className="text-neutral-300">{fmt(r.phone_number)}</TableCell>
+                <TableCell className="text-neutral-300">{fmt(r.email)}</TableCell>
                 <TableCell className="text-neutral-300">
-                  {fmt(r.job_title)}
-                </TableCell>
-                <TableCell className="text-neutral-300">
-                  {fmt(r.phone_number)}
-                </TableCell>
-                <TableCell className="text-neutral-300">
-                  {fmt(r.email)}
-                </TableCell>
-                <TableCell className="text-neutral-300">
-                  {maskPwd(r.password)}
+                  {r.password ? "••••••••" : "—"}
                 </TableCell>
                 <TableCell>
                   <span
@@ -265,31 +335,27 @@ export default function UserList() {
                     {fmt(r.status)}
                   </span>
                 </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.created_by)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.updated_by)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.supervisor_id)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.department_id)}
-                </TableCell>
-                <TableCell className="text-neutral-400">
-                  {fmt(r.role)}
-                </TableCell>
+                <TableCell className="text-neutral-400">{fmt(r.created_by)}</TableCell>
+                <TableCell className="text-neutral-400">{fmt(r.updated_by)}</TableCell>
+                <TableCell className="text-neutral-400">{fmt(r.supervisor_id)}</TableCell>
+                <TableCell className="text-neutral-400">{fmt(r.department_id)}</TableCell>
+                <TableCell className="text-neutral-400">{fmt(r.role)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
                       size="sm"
                       variant="secondary"
                       className="bg-neutral-800 hover:bg-neutral-700"
+                      onClick={() => handleUpdate(r.id)} // ✅ use r.id (not u.id)
                     >
                       Update
                     </Button>
-                    <Button size="sm" variant="destructive">
+
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(r.id)} // ✅ use r.id (not u.id)
+                    >
                       Delete
                     </Button>
                   </div>
@@ -299,10 +365,7 @@ export default function UserList() {
 
             {current.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={19}
-                  className="text-center py-10 text-neutral-500"
-                >
+                <TableCell colSpan={19} className="text-center py-10 text-neutral-500">
                   No results
                 </TableCell>
               </TableRow>
@@ -310,6 +373,7 @@ export default function UserList() {
           </TableBody>
         </Table>
 
+        {/* Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-neutral-800">
           <div className="text-sm text-neutral-400">
             {selected.size} of {rows.length} rows selected

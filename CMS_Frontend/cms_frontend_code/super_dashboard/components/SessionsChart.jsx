@@ -41,7 +41,7 @@ function getDaysInMonth(month, year) {
 
 export default function SessionsChart() {
   const theme = useTheme();
-  const data = getDaysInMonth(4, 2024);
+  const data = getDaysInMonth(8, 2025);
 
   const colorPalette = [
     theme.palette.primary.light,
