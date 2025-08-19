@@ -31,6 +31,7 @@ export const update_user = (id, payload) =>
 export const delete_user = (id) => api.delete(`/api/delete_user/${id}`);
 export const get_new_users = () => api.get("/api/get_new_users");
 export const get_total_users = () => api.get("/api/get_total_users");
+export const save_menu = (payload) => api.post("/api/save_menu", payload);
 
 /* 
 export const get_menu_children = (id) => api.get(`/api/menus/${id}/children`);

@@ -28,6 +28,12 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import CreateMenu from './CreateMenu.jsx'
+
+const BUTTON_WRAPPER_STYLES = {
+  position: 'relative',
+  zIndex: 1
+}
 
 function buildTree(items) {
   const map = new Map(items.map((i) => [i.id, { ...i, children: [] }]));
@@ -91,6 +97,7 @@ const menuStats = [
   },
 ];
 export default function MenuList() {
+  const [isOpen, setIsOpen] = useState(false)
   const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
@@ -187,8 +194,8 @@ export default function MenuList() {
           </CardHeader>
           <CardContent className="text-2xl font-semibold">15</CardContent>
         </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
+        <Card className="bg-neutral-/60 border-neutral-800">
+          <CardHeader className="pb-2">900
             <CardTitle className="text-sm text-neutral-400">Archived</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">8</CardContent>
@@ -255,6 +262,13 @@ export default function MenuList() {
           </Select>
         </div>
 
+ <div style={BUTTON_WRAPPER_STYLES} onClick={() => console.log('clicked')}>
+        <button onClick={() => setIsOpen(true)}> Create Menu</button>
+
+        <CreateMenu open={isOpen} onClose={() => setIsOpen(false)}>
+          Fancy Modal
+        </CreateMenu>
+      </div>
         <Button className="bg-neutral-800 hover:bg-neutral-700">
           <Plus className="mr-2 h-4 w-4" />
           Create Menu
