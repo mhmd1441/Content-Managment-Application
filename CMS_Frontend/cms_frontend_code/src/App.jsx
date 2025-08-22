@@ -34,14 +34,13 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
+        <Route element={<ProtectedRoute />}>
         <Route
           path="/super_dashboard"
           element={
-            <ProtectedRoute>
-              <div className="App h-screen overflow-y-auto">
-                <SuperDashboard />
-              </div>
-            </ProtectedRoute>
+            <div className="App h-screen overflow-y-auto">
+              <SuperDashboard />
+            </div>
           }
         >
           <Route index element={<MainGrid />} />
@@ -54,11 +53,9 @@ export default function App() {
         <Route
           path="/business_dashboard"
           element={
-            <ProtectedRoute>
-              <div className="App h-screen overflow-y-auto">
-                <BusinessDashboard />
-              </div>
-            </ProtectedRoute>
+            <div className="App h-screen overflow-y-auto">
+              <BusinessDashboard />
+            </div>
           }
         >
           <Route index element={<BusinessMenus />} />
@@ -78,15 +75,14 @@ export default function App() {
         <Route
           path="/user_dashboard"
           element={
-            <ProtectedRoute>
-              <div className="App h-screen overflow-y-auto">
-                <UserDashboard />
-              </div>
-            </ProtectedRoute>
+            <div className="App h-screen overflow-y-auto">
+              <UserDashboard />
+            </div>
           }
         >
           <Route index element={<UserHome />} />
         </Route>
+      </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

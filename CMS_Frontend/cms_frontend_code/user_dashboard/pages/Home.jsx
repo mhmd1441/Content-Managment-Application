@@ -24,8 +24,7 @@ export default function UserHome() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
-  // Active selections
-  const [activeMenuId, setActiveMenuId] = useState(null); // can be parent or child
+  const [activeMenuId, setActiveMenuId] = useState(null); 
   const [openTopByClick, setOpenTopByClick] = useState(null);
   const [hoverTopId, setHoverTopId] = useState(null);
 

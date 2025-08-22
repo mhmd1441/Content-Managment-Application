@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { Settings, User } from "lucide-react"; // ✅ icons only
 import "../styles/user.css";
 import TouchLogo from "@/assets/TouchLogo.png";
+import { useAuth } from "../../src/auth/AuthContext";
+import * as React from "react";
+
 
 export default function UserHeader() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  
+  
 
   // close on outside click or ESC
   useEffect(() => {
@@ -24,6 +32,21 @@ export default function UserHeader() {
       document.removeEventListener("keydown", onKey);
     };
   }, []);
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+const handleLogout = async () => {
+    handleClose();
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+    navigate("/login", { replace: true });
+  };
+
 
   return (
     <header className="ud-topbar">
@@ -55,7 +78,6 @@ export default function UserHeader() {
               onClick={() => setOpen((v) => !v)}
             >
               <User className="ud-profile-icon w-6 h-6" aria-hidden="true" />
-              <span className="sr-only">Open user menu</span>
             </button>
 
             {open && (
@@ -65,9 +87,6 @@ export default function UserHeader() {
                 aria-labelledby="user-menu-trigger"
                 className="ud-menu"
               >
-                <div className="ud-menu-label" role="presentation">
-                  My Account
-                </div>
                 <hr className="ud-menu-sep" />
                 <Link
                   to="/user_dashboard/profile"
@@ -78,6 +97,9 @@ export default function UserHeader() {
                 >
                   Profile
                 </Link>
+                  <button  className="ud-menu-label" role="presentation"onClick={handleLogout}>
+                    Log Out
+                  </button>
               </div>
             )}
           </div>

@@ -67,7 +67,6 @@ export default function SideMenu() {
           <Avatar
   sizes="small"
   alt={`${currentUser?.first_name ?? ""} ${currentUser?.last_name ?? ""}`}
-  src="/static/images/avatar/7.jpg"
   sx={{ width: 36, height: 36 }}
 >
   {(currentUser?.first_name?.[0] ?? "U").toUpperCase()}

@@ -3,13 +3,12 @@ import "./LogIn.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import touchLogo from "../assets/TouchLogo.png";
-import { initCsrf } from "../services/api";
 
 
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, authBusy } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +17,6 @@ export default function Login() {
     if (!email.trim() || !password.trim())
       return setError("Both email and password are required.");
     try {
-      await initCsrf();
       const user = await login(email, password);
       const rolePaths = {
         super_admin: "/super_dashboard",
@@ -27,10 +25,13 @@ export default function Login() {
       };
       if (rolePaths[user.role]) return navigate(rolePaths[user.role]);
       setError("Unknown role. Access denied.");
-    }  catch (err) {
-    setError("Session error – please reload and log in again.");
-    console.error("/me error:", err);
-  }
+    } catch (err) {
+      if (err?.response?.status === 422 || err?.response?.status === 401) {
+        setError("Invalid email or password.");
+      } else {
+        setError("Login failed. Try again.");
+      }
+    }
 };
 
   return (
@@ -69,7 +70,7 @@ export default function Login() {
             </button>
           </div>
 
-          <button type="button" className="submit-btn" onClick={handleLogin}>
+          <button type="button" className="submit-btn" onClick={handleLogin} disabled={authBusy}>
             Log In
           </button>
         </div>
