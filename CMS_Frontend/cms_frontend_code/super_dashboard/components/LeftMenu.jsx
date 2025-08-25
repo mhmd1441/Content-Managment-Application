@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { NavLink } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -15,8 +14,8 @@ import GroupIcon from '@mui/icons-material/Group';
 const mainListItems = [
   { text: 'Analytics',        icon: <AnalyticsRoundedIcon />,    path: '/super_dashboard' },
   { text: 'Menus',            icon: <MenuRoundedIcon />,         path: '/super_dashboard/menu' },
-  { text: 'Content Sections', icon: <ContentCopyOutlinedIcon />, path: '/super_dashboard/content-section' },
-  { text: 'Department',       icon: <ApartmentIcon />,           path: '/super_dashboard/Department' },
+  { text: 'Content Sections', icon: <ContentCopyOutlinedIcon />, path: '/super_dashboard/content_section' },
+  { text: 'Department',       icon: <ApartmentIcon />,           path: '/super_dashboard/department' },
   { text: 'Users',            icon: <GroupIcon />,               path: '/super_dashboard/user' },
 ];
 

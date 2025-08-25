@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ correct import for the hook
+import { useNavigate } from "react-router-dom";
 import {
   initCsrf,
   get_users,
@@ -36,11 +36,13 @@ import {
 } from "lucide-react";
 import Loader from "../../../src/lib/loading.jsx";
 
+
+
 const fmt = (v) =>
   v === null || v === undefined || v === "" ? "—" : String(v);
 
 export default function UserList() {
-  const navigate = useNavigate(); // ✅ hook must be inside a component
+  const navigate = useNavigate();
 
   const [rowsRaw, setRowsRaw] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,6 @@ export default function UserList() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(new Set());
 
-  // --- load function so we can reuse after delete ---
   const load = async () => {
     setLoading(true);
     try {
@@ -74,7 +75,6 @@ export default function UserList() {
     }
   };
 
-  // --- stats ---
   useEffect(() => {
     get_new_users()
       .then((res) => setNewUsers(res?.data?.count ?? 0))
@@ -97,20 +97,16 @@ export default function UserList() {
       .catch(() => setTotalUsers(0));
   }, []);
 
-  // --- initial fetch once ---
   useEffect(() => {
     if (did.current) return;
     did.current = true;
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- derived totals ---
   const totalUsersDerived = useMemo(() => rowsRaw.length, [rowsRaw]);
   const totalUsersDisplay =
     totalUsersDerived > 0 ? totalUsersDerived : totalUser;
 
-  // --- filters & paging ---
   const rows = useMemo(() => {
     let r = rowsRaw.slice();
     if (q.trim()) {
@@ -147,21 +143,18 @@ export default function UserList() {
     });
   };
 
-  const maskPwd = (p) => (p ? "••••••••" : "—");
-
-  // --- row actions (INSIDE component so they see navigate/load state) ---
   const handleUpdate = (id) => {
-    if (!id) return;
-    navigate(`/users/edit/${id}`);
-  };
+  if (!id) return;
+  navigate(`/super_dashboard/user/edit/${id}`);
+};
 
   const handleDelete = async (id) => {
     if (!id) return alert("Missing user id.");
     if (!window.confirm("Delete this user?")) return;
     try {
-      await initCsrf();          // fresh CSRF cookie
-      await delete_user(id);     // DELETE /api/delete_user/:id
-      await load();              // refresh rows
+      await initCsrf();         
+      await delete_user(id);     
+      await load();              
     } catch (e) {
       console.error(e);
       alert(e?.response?.data?.message || "Delete failed.");
@@ -201,7 +194,6 @@ export default function UserList() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Stats */}
       <div className="grid grid-cols-12 gap-4 mb-4">
         {cards.map((card, index) => (
           <div key={index} className="col-span-12 sm:col-span-6 lg:col-span-3">
@@ -210,7 +202,6 @@ export default function UserList() {
         ))}
       </div>
 
-      {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative w-full sm:max-w-xs">
@@ -267,13 +258,15 @@ export default function UserList() {
           </Select>
         </div>
 
-        <Button
-          className="bg-neutral-800 hover:bg-neutral-700"
-          onClick={() => navigate("/users/new")}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Create User
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => navigate("/super_dashboard/user/createUser")}
+            className="bg-neutral-800 hover:bg-neutral-700"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create User
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -346,7 +339,7 @@ export default function UserList() {
                       size="sm"
                       variant="secondary"
                       className="bg-neutral-800 hover:bg-neutral-700"
-                      onClick={() => handleUpdate(r.id)} // ✅ use r.id (not u.id)
+                      onClick={() => handleUpdate(r.id)}
                     >
                       Update
                     </Button>
@@ -354,7 +347,7 @@ export default function UserList() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleDelete(r.id)} // ✅ use r.id (not u.id)
+                      onClick={() => handleDelete(r.id)}
                     >
                       Delete
                     </Button>

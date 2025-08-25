@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, get_departments } from "../../src/services/api";
+import {
+  initCsrf,
+  get_contentSections,
+  delete_contentSection,
+} from "@/services/api.js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Loader from "@/lib/loading.jsx";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -27,23 +33,41 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import Loader from "../../src/lib/loading.jsx";
 
 const fmt = (v) =>
   v === null || v === undefined || v === "" ? "—" : String(v);
 
-export default function DepartmentList() {
-  const [rowsRaw, setRowsRaw] = useState([]);
+function buildTree(items) {
+  const map = new Map(items.map((i) => [i.id, { ...i, children: [] }]));
+  const roots = [];
+  for (const i of items) {
+    const node = map.get(i.id);
+    if (i.parent_id && map.has(i.parent_id))
+      map.get(i.parent_id).children.push(node);
+    else roots.push(node);
+  }
+  return roots;
+}
+function flattenTree(nodes, depth = 0, out = []) {
+  for (const n of nodes) {
+    out.push({ ...n, depth });
+    if (n.children?.length) flattenTree(n.children, depth + 1, out);
+  }
+  return out;
+}
+
+export default function ContentSectionList() {
+  const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const did = useRef(false);
-
   const [q, setQ] = useState("");
-  const [country, setCountry] = useState("all");
-  const [city, setCity] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [parentFilter, setParentFilter] = useState("all");
+  const [selected, setSelected] = useState(new Set());
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState(new Set());
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (did.current) return;
@@ -51,12 +75,12 @@ export default function DepartmentList() {
     (async () => {
       try {
         await initCsrf();
-        const res = await get_departments();
-        const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setRowsRaw(arr);
+        const res = await get_contentSections();
+        const flat = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        setTree(buildTree(flat));
       } catch (e) {
         console.error(e);
-        setErr("Failed to load Departments");
+        setErr("Failed to load Content Sections");
       } finally {
         setLoading(false);
       }
@@ -64,24 +88,29 @@ export default function DepartmentList() {
   }, []);
 
   const rows = useMemo(() => {
-    let r = rowsRaw.slice();
-
+    let r = flattenTree(tree);
     if (q.trim()) {
       const needle = q.toLowerCase();
       r = r.filter(
         (x) =>
-          String(x.id).includes(needle) ||
-          x.name?.toLowerCase?.().includes(needle) ||
-          x.country?.toLowerCase?.().includes(needle) ||
-          x.city?.toLowerCase?.().includes(needle)
+          x.subtitle?.toLowerCase?.().includes(needle) ||
+          x.description?.toLowerCase?.().includes(needle) ||
+          x.route?.toLowerCase?.().includes(needle) ||
+          String(x.id).includes(needle)
       );
     }
-    if (country !== "all")
-      r = r.filter((x) => (x.country || "").toLowerCase() === country);
-    if (city !== "all")
-      r = r.filter((x) => (x.city || "").toLowerCase() === city);
+    if (status !== "all")
+      r = r.filter((x) => (x.status || "").toLowerCase() === status);
+    if (parentFilter !== "all") {
+      const pf = parentFilter.toLowerCase();
+      r = r.filter((x) =>
+        String(x.parent_id ?? "")
+          .toLowerCase()
+          .includes(pf)
+      );
+    }
     return r;
-  }, [rowsRaw, q, country, city]);
+  }, [tree, q, status, parentFilter]);
 
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
   const current = rows.slice((page - 1) * pageSize, page * pageSize);
@@ -107,12 +136,39 @@ export default function DepartmentList() {
   }
   if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
 
-  const countrySet = new Set(
-    rowsRaw.map((r) => (r.country || "").toLowerCase()).filter(Boolean)
-  );
-  const citySet = new Set(
-    rowsRaw.map((r) => (r.city || "").toLowerCase()).filter(Boolean)
-  );
+  const handleUpdate = (id) => {
+    if (!id) return;
+    navigate(`/super_dashboard/content_section/edit/${id}`);
+  };
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      await initCsrf();
+      const res = await get_contentSections();
+      const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
+     setTree(buildTree(arr));        
+      setErr(null);
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to load Content Sections");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) return alert("Missing content section id.");
+    if (!window.confirm("Delete this content section?")) return;
+    try {
+      await initCsrf();
+      await delete_contentSection(id);
+      await load();
+    } catch (e) {
+      console.error(e);
+      alert(e?.response?.data?.message || "Delete failed.");
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -120,12 +176,32 @@ export default function DepartmentList() {
         <Card className="bg-neutral-900/60 border-neutral-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-neutral-400">
-              Total Departments
+              Total Content Sections
             </CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">
             {rows.length}
           </CardContent>
+        </Card>
+        <Card className="bg-neutral-900/60 border-neutral-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-neutral-400">
+              Content Sections This Month
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">15</CardContent>
+        </Card>
+        <Card className="bg-neutral-900/60 border-neutral-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-neutral-400">Archived</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">8</CardContent>
+        </Card>
+        <Card className="bg-neutral-900/60 border-neutral-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-neutral-400">Drafts</CardTitle>
+          </CardHeader>
+          <CardContent className="text-2xl font-semibold">4</CardContent>
         </Card>
       </div>
 
@@ -134,7 +210,7 @@ export default function DepartmentList() {
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-neutral-500" />
             <Input
-              placeholder="Search by id, name, country, city…"
+              placeholder="Search Content Sections..."
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -145,50 +221,52 @@ export default function DepartmentList() {
           </div>
 
           <Select
-            value={country}
+            value={status}
             onValueChange={(v) => {
-              setCountry(v);
+              setStatus(v);
               setPage(1);
             }}
           >
             <SelectTrigger className="w-[160px] bg-neutral-900/60 border-neutral-800">
-              <SelectValue placeholder="Country" />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent className="bg-neutral-900 border-neutral-800">
-              <SelectItem value="all">All countries</SelectItem>
-              {[...countrySet].map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c || "—"}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
 
           <Select
-            value={city}
+            value={parentFilter}
             onValueChange={(v) => {
-              setCity(v);
+              setParentFilter(v);
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-[160px] bg-neutral-900/60 border-neutral-800">
-              <SelectValue placeholder="City" />
+            <SelectTrigger className="w-[180px] bg-neutral-900/60 border-neutral-800">
+              <SelectValue placeholder="Filter by parent" />
             </SelectTrigger>
             <SelectContent className="bg-neutral-900 border-neutral-800">
-              <SelectItem value="all">All cities</SelectItem>
-              {[...citySet].map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c || "—"}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">All parents</SelectItem>
+              <SelectItem value="1">Parent ID includes “1”</SelectItem>
+              <SelectItem value="projects">
+                Parent includes “projects”
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Button className="bg-neutral-800 hover:bg-neutral-700">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Department
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => navigate("/super_dashboard/content_section/create")}
+            className="bg-neutral-800 hover:bg-neutral-700"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Content Section
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border border-neutral-800 bg-neutral-950/60 overflow-hidden">
@@ -205,11 +283,18 @@ export default function DepartmentList() {
                 />
               </TableHead>
               <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Country</TableHead>
-              <TableHead>City</TableHead>
+              <TableHead>Subtitle</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Image Path</TableHead>
+              <TableHead>Order</TableHead>
+              <TableHead>Expandable</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created By</TableHead>
               <TableHead>Updated By</TableHead>
-              <TableHead>Director ID</TableHead>
+              <TableHead>Published At</TableHead>
+              <TableHead>Parent ID</TableHead>
+              <TableHead>Menu ID</TableHead>
+              <TableHead>Created At</TableHead>
               <TableHead>Updated At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -222,23 +307,58 @@ export default function DepartmentList() {
                   <Checkbox
                     checked={selected.has(r.id)}
                     onCheckedChange={() => toggleOne(r.id)}
+                    aria-label={`Select row ${r.id}`}
                   />
                 </TableCell>
                 <TableCell className="text-neutral-300">{fmt(r.id)}</TableCell>
                 <TableCell className="text-neutral-200">
-                  {fmt(r.name)}
+                  <span style={{ paddingLeft: (r.depth || 0) * 16 }}>
+                    {fmt(r.subtitle)}
+                  </span>
                 </TableCell>
                 <TableCell className="text-neutral-300">
-                  {fmt(r.country)}
+                  {fmt(r.description)}
                 </TableCell>
                 <TableCell className="text-neutral-300">
-                  {fmt(r.city)}
+                  {fmt(r.image_path)}
+                </TableCell>
+                <TableCell className="text-neutral-300">
+                  {fmt(r.order)}
+                </TableCell>
+                <TableCell className="text-neutral-300">
+                  {fmt(r.is_expandable)}
+                </TableCell>
+                <TableCell>
+                  <span
+                    className={
+                      "inline-flex items-center rounded px-2 py-0.5 text-xs " +
+                      (r.status === "published"
+                        ? "bg-emerald-900/30 text-emerald-300"
+                        : r.status === "draft"
+                        ? "bg-neutral-800 text-neutral-300"
+                        : "bg-amber-900/30 text-amber-300")
+                    }
+                  >
+                    {fmt(r.status)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-neutral-400">
+                  {fmt(r.created_by)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.updated_by)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
-                  {fmt(r.director_id)}
+                  {fmt(r.published_at)}
+                </TableCell>
+                <TableCell className="text-neutral-400">
+                  {fmt(r.parent_id)}
+                </TableCell>
+                <TableCell className="text-neutral-400">
+                  {fmt(r.menu_id)}
+                </TableCell>
+                <TableCell className="text-neutral-400">
+                  {fmt(r.created_at)}
                 </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.updated_at)}
@@ -249,10 +369,15 @@ export default function DepartmentList() {
                       size="sm"
                       variant="secondary"
                       className="bg-neutral-800 hover:bg-neutral-700"
+                      onClick={() => handleUpdate(r.id)}
                     >
                       Update
                     </Button>
-                    <Button size="sm" variant="destructive">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(r.id)}
+                    >
                       Delete
                     </Button>
                   </div>
@@ -263,7 +388,7 @@ export default function DepartmentList() {
             {current.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={11}
+                  colSpan={16}
                   className="text-center py-10 text-neutral-500"
                 >
                   No results
@@ -273,10 +398,12 @@ export default function DepartmentList() {
           </TableBody>
         </Table>
 
+        {/* Footer / Pagination */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-neutral-800">
           <div className="text-sm text-neutral-400">
             {selected.size} of {rows.length} rows selected
           </div>
+
           <div className="flex items-center gap-3">
             <Select
               value={String(pageSize)}
@@ -297,6 +424,7 @@ export default function DepartmentList() {
             <div className="text-sm text-neutral-400">
               Page {page} of {pageCount}
             </div>
+
             <div className="flex items-center gap-1">
               <Button
                 size="icon"

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, getMenus } from "../../../src/services/api.js";
+import { initCsrf, getMenus, delete_menu,get_new_menus,get_total_menus } from "../../../src/services/api.js";
 import Loader from "../../../src/lib/loading.jsx";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,12 +27,8 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import CreateMenu from './CreateMenu.jsx'
+import { useNavigate } from "react-router-dom";
 
-const BUTTON_WRAPPER_STYLES = {
-  position: 'relative',
-  zIndex: 1
-}
 
 function buildTree(items) {
   const map = new Map(items.map((i) => [i.id, { ...i, children: [] }]));
@@ -54,62 +49,60 @@ function flattenTree(nodes, depth = 0, out = []) {
   return out;
 }
 const fmt = (v) => (v === null || v === undefined || v === "" ? "—" : v);
-const menuStats = [
-  {
-    title: "Total Menus",
-    value: "120",
-    interval: "All time",
-    trend: "neutral",
-    data: [
-      10, 12, 13, 12, 14, 16, 15, 17, 18, 17, 19, 20, 19, 21, 22, 22, 23, 22,
-      22, 23, 24, 25, 25, 26, 26, 26, 27, 27, 28, 28,
-    ],
-  },
-  {
-    title: "Menus This Month",
-    value: "15",
-    interval: "Last 30 days",
-    trend: "up",
-    data: [
-      2, 2, 1, 3, 2, 3, 2, 4, 3, 4, 3, 5, 4, 5, 4, 6, 5, 6, 5, 6, 5, 7, 5, 7, 6,
-      7, 6, 8, 7, 8,
-    ],
-  },
-  {
-    title: "Archived",
-    value: "8",
-    interval: "All time",
-    trend: "neutral",
-    data: [
-      0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-      1, 1, 1, 1, 1,
-    ],
-  },
-  {
-    title: "Drafts",
-    value: "4",
-    interval: "All time",
-    trend: "down",
-    data: [
-      6, 6, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-      4, 4, 4, 4, 4,
-    ],
-  },
-];
+
+
 export default function MenuList() {
-  const [isOpen, setIsOpen] = useState(false)
   const [tree, setTree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const did = useRef(false);
-
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [parentFilter, setParentFilter] = useState("all");
-
   const [selected, setSelected] = useState(new Set());
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [rowsRaw, setRowsRaw] = useState([]);
+  const [newMenus, setNewMenus] = useState(0);
+  const [totalMenu, setTotalMenus] = useState(0);
+  const navigate = useNavigate();
+
+
+
+
+const totalMenusDerived = useMemo(() => rowsRaw.length, [rowsRaw]);
+const totalMenusDisplay =
+    totalMenusDerived > 0 ? totalMenusDerived : totalMenu;
+
+const cardsMemo = useMemo(
+   () => [
+     { title: "New Menus This Month", value: String(newMenus) },
+     { title: "Total Menus", value: String(totalMenusDisplay) },
+   ],
+   [newMenus, totalMenusDisplay]
+ );
+
+useEffect(() => {
+    get_new_menus()
+      .then((res) => setNewMenus(res?.data?.count ?? 0))
+      .catch(() => setNewMenus(0));
+  }, []);
+
+  useEffect(() => {
+      get_total_menus()
+        .then((res) => {
+          const d = res?.data;
+          const total =
+            (typeof d === "number" && d) ||
+            d?.count ||
+            d?.total ||
+            d?.data?.total ||
+            d?.meta?.total ||
+            0;
+          setTotalMenus(Number(total));
+        })
+        .catch(() => setTotalMenus(0));
+    }, []);
 
   useEffect(() => {
     if (did.current) return;
@@ -175,44 +168,59 @@ export default function MenuList() {
   }
   if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
 
+  const handleUpdate = (id) => {
+    if (!id) return;
+    navigate(`/super_dashboard/menu/edit/${id}`);
+  };
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      await initCsrf();
+      const res = await getMenus();
+      const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setRowsRaw(arr);
+      setErr(null);
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to load Menus");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleDelete = async (id) => {
+    if (!id) return alert("Missing Menu id.");
+    if (!window.confirm("Delete this Menu?")) return;
+    try {
+      await initCsrf();
+      await delete_menu(id);
+      await load();
+    } catch (e) {
+      console.error(e);
+      alert(e?.response?.data?.message || "Delete failed.");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Total Menus
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">120</CardContent>
-        </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Menus This Month
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">15</CardContent>
-        </Card>
-        <Card className="bg-neutral-/60 border-neutral-800">
-          <CardHeader className="pb-2">900
-            <CardTitle className="text-sm text-neutral-400">Archived</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">8</CardContent>
-        </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">Drafts</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">4</CardContent>
-        </Card>
-      </div>
+      <div className="grid grid-cols-12 gap-4 mb-4">
+       {cardsMemo.map(({ title, value }, i) => (
+         <div
+           key={i}
+           className="col-span-12 sm:col-span-6 lg:col-span-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 shadow-sm"
+         >
+           <div className="text-sm text-neutral-400">{title}</div>
+           <div className="mt-1 text-2xl font-semibold tracking-tight">{value}</div>
+         </div>
+       ))}
+     </div>
 
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-neutral-500" />
+            <br></br>
             <Input
               placeholder="Search menus…"
               value={q}
@@ -262,17 +270,15 @@ export default function MenuList() {
           </Select>
         </div>
 
- <div style={BUTTON_WRAPPER_STYLES} onClick={() => console.log('clicked')}>
-        <button onClick={() => setIsOpen(true)}> Create Menu</button>
-
-        <CreateMenu open={isOpen} onClose={() => setIsOpen(false)}>
-          Fancy Modal
-        </CreateMenu>
-      </div>
-        <Button className="bg-neutral-800 hover:bg-neutral-700">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Menu
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => navigate("/super_dashboard/menu/createMenu")}
+            className="bg-neutral-800 hover:bg-neutral-700"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Menu
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -294,6 +300,7 @@ export default function MenuList() {
               <TableHead>Route</TableHead>
               <TableHead>Order</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Position</TableHead>
               <TableHead>Created By</TableHead>
               <TableHead>Updated By</TableHead>
               <TableHead>Published At</TableHead>
@@ -340,6 +347,9 @@ export default function MenuList() {
                     {fmt(r.status)}
                   </span>
                 </TableCell>
+                <TableCell className="text-neutral-300">
+                  {fmt(r.position)}
+                </TableCell>
                 <TableCell className="text-neutral-400">
                   {fmt(r.created_by)}
                 </TableCell>
@@ -364,10 +374,15 @@ export default function MenuList() {
                       size="sm"
                       variant="secondary"
                       className="bg-neutral-800 hover:bg-neutral-700"
+                      onClick={() => handleUpdate(r.id)}
                     >
                       Update
                     </Button>
-                    <Button size="sm" variant="destructive">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(r.id)}
+                    >
                       Delete
                     </Button>
                   </div>
@@ -378,7 +393,7 @@ export default function MenuList() {
             {current.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={13}
+                  colSpan={14}
                   className="text-center py-10 text-neutral-500"
                 >
                   No results

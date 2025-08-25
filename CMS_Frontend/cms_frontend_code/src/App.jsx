@@ -1,29 +1,42 @@
-import React from "react";
 import Login from "./logIn/Login.jsx";
-import ContentSectionList from "../super_dashboard/components/contentSectionList.jsx";
-import SignUp from "../super_dashboard/components/User/UserCreation.jsx";
-import  SuperDashboard from "../super_dashboard/Dashboard.jsx";
-import  UserDashboard from "../user_dashboard/Dashboard.jsx";
-import  BusinessDashboard from "../business_dashboard/Dashboard.jsx";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import UserList from "../super_dashboard/components/User/UserList.jsx";
 import MainGrid from "../super_dashboard/components/MainGrid.jsx";
 import MenuList from "../super_dashboard/components/Menu/MenuList.jsx";
-import Department from "../super_dashboard/components/DepartmentList.jsx";
-import Feedback from "../business_dashboard/pages/Menu/leftMenu/feedback.jsx";
-import Settings from "../business_dashboard/pages/Menu/leftMenu/settings.jsx";
-import About from "../business_dashboard/pages/Menu/leftMenu/about.jsx";
-import AnalyticsDashboard from "../business_dashboard/Analytics.jsx";
-import ProtectedRoute from "./auth/ProtectedRoute";
+import DepartmentList from "../super_dashboard/components/department/DepartmentList.jsx";
+import ContentSectionList from "../super_dashboard/components/contentSection/contentSectionList.jsx";
+import SignUp from "../super_dashboard/components/User/CreateUser.jsx";
+import SuperDashboard from "../super_dashboard/Dashboard.jsx";
+import CreateMenuPage from "../super_dashboard/components/Menu/CreateMenu.jsx";
+import CreateUserPage from "../super_dashboard/components/User/CreateUser.jsx";
+import CreateDepartmentPage from "../super_dashboard/components/department/CreateDepartment.jsx";
+import CreateContentSectionPage from "../super_dashboard/components/contentSection/CreateContentSection.jsx";
+import UpdateUserPage from "../super_dashboard/components/User/UpdateUser.jsx";
+import UpdateMenuPage from "../super_dashboard/components/Menu/UpdateMenu.jsx";
+import UpdateDepartmentPage from "../super_dashboard/components/Department/UpdateDepartment.jsx";
+import UpdateContentSectionPage from "../super_dashboard/components/ContentSection/UpdateContentSection.jsx";
+
+
+import AddContentSection from "../business_dashboard/pages/Creation/addContentSection.jsx";
+import AddMenu from "../business_dashboard/pages/Creation/addMenu.jsx";
 import BusinessMenus from "../business_dashboard/pages/Menu/BusinessMenus.jsx";
 import BusinessMenuDetail from "../business_dashboard/pages/Menu/BusinessMenuDetail.jsx";
 import BusinessContentList from "../business_dashboard/pages/Menu/BusinessContentList.jsx";
 import BusinessUsers from "../business_dashboard/pages/User/UserList.jsx";
-import User from "../super_dashboard/components/User/UserList.jsx";
 import BusinessAllContent from "../business_dashboard/pages/ContentSection/AllContent.jsx";
 import BusinessProfile from "../business_dashboard/pages/ProfileSection/Profile.jsx";
+import BusinessDashboard from "../business_dashboard/Dashboard.jsx";
+import Feedback from "../business_dashboard/pages/Menu/leftMenu/feedback.jsx";
+import Settings from "../business_dashboard/pages/Menu/leftMenu/settings.jsx";
+import About from "../business_dashboard/pages/Menu/leftMenu/about.jsx";
+import AnalyticsDashboard from "../business_dashboard/Analytics.jsx";
+
+import UserDashboard from "../user_dashboard/Dashboard.jsx";
 import UserHome from "../user_dashboard/pages/Home.jsx";
-import AddContentSection from "../business_dashboard/pages/Creation/addContentSection.jsx";
-import AddMenu from "../business_dashboard/pages/Creation/addMenu.jsx";
-import { Routes, Route, Navigate } from "react-router-dom";
+
+
 
 
 
@@ -43,12 +56,21 @@ export default function App() {
             </div>
           }
         >
-          <Route index element={<MainGrid />} />
+          <Route index element={<MainGrid />} />          
+          <Route path="user" element={<UserList />} />
           <Route path="menu" element={<MenuList />} />
-          <Route path="content-section" element={<ContentSectionList />} />
-          <Route path="department" element={<Department />} />
-          <Route path="user" element={<User />} />
-        </Route>
+          <Route path="content_section" element={<ContentSectionList />} />
+          <Route path="department" element={<DepartmentList />} />
+          <Route path="user/createUser" element={<CreateUserPage />} />
+          <Route path="menu/createMenu" element={<CreateMenuPage />} />
+          <Route path="department/createDepartment" element={<CreateDepartmentPage />} />
+          <Route path="content_section/create" element={<CreateContentSectionPage />} />
+          <Route path="user/edit/:id" element={<UpdateUserPage />} />
+          <Route path="menu/edit/:id" element={<UpdateMenuPage />} />
+          <Route path="department/edit/:id" element={<UpdateDepartmentPage />} />
+          <Route path="content_section/edit/:id" element={<UpdateContentSectionPage />} />
+          </Route>
+
 
         <Route
           path="/business_dashboard"
