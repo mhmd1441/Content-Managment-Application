@@ -36,6 +36,8 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class])->group(function ()
         Route::get('/show_menu/{id}', [MenuApiController::class, 'show']);
         Route::put('/update_menu/{id}', [MenuApiController::class, 'update']);
         Route::delete('/delete_menu/{id}', [MenuApiController::class, 'destroy']);
+        Route::get('/get_new_menus', [UserApiController::class, 'newUsersThisMonth']);
+        Route::get('/get_total_menus', [UserApiController::class, 'total']);
 
         Route::get('/get_contentSections', [ContentSectionApiController::class, 'index']);
         Route::post('/save_contentSection', [ContentSectionApiController::class, 'store']);

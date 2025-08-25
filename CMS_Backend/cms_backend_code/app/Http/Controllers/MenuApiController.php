@@ -113,4 +113,9 @@ class MenuApiController extends Controller
 
         return $this->sendResponse("Menu deleted Successfully", []);
     }
+
+    public function total()
+    {
+        return Menu::all()->count();
+    }
 }
