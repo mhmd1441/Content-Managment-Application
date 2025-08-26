@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { initCsrf, getMenus, delete_menu,get_new_menus,get_total_menus } from "../../../src/services/api.js";
-import Loader from "../../../src/lib/loading.jsx";
+import Loader from "@/lib/loading.jsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -215,7 +215,6 @@ useEffect(() => {
        ))}
      </div>
 
-      {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <div className="relative w-full sm:max-w-xs">
@@ -281,7 +280,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="rounded-lg border border-neutral-800 bg-neutral-950/60 overflow-hidden">
         <Table>
           <TableHeader>

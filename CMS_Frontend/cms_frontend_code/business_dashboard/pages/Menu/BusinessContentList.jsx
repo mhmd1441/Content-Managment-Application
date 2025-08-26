@@ -7,6 +7,7 @@ import {
 } from "../../../src/services/api";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import Loader from "@/lib/loading.jsx";
 
 const fmt = (v) => v ?? "—";
 
@@ -43,7 +44,6 @@ export default function BusinessContentList() {
   }, []);
 
   const childMenu = menus.find((x) => String(x.id) === String(childId));
-  // Filter content sections by `menu_id` === childId (adjust if your schema uses `parent_id`)
   const items = useMemo(() => {
     let arr = sections.filter((s) => String(s.menu_id) === String(childId));
     if (q.trim()) {
@@ -57,13 +57,17 @@ export default function BusinessContentList() {
     return arr;
   }, [sections, childId, q]);
 
-  if (loading)
-    return <div className="p-6 text-sm text-neutral-300">Loading…</div>;
-  if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
+   if (loading) {
+      return (
+        <div className="flex items-center justify-center py-24" aria-busy="true">
+          <Loader />
+        </div>
+      );
+    }
+  if (err) return <div role="alert" className="p-6 text-sm text-red-400">{err}</div>;
 
   return (
     <div className="bd-container space-y-5">
-      {/* Breadcrumbs */}
       <div className="text-sm text-neutral-400">
         <Link to="/business_dashboard" className="hover:underline">
           All Menus

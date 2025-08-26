@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { initCsrf, getMenus } from "../../../src/services/api";
 import { Card, CardContent } from "@/components/ui/card";
+import Loader from "@/lib/loading.jsx";
 
 const fmt = (v) => v ?? "—";
 
@@ -11,25 +12,30 @@ export default function BusinessMenuDetail() {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
-  const did = useRef(false);
 
   useEffect(() => {
-    if (did.current) return;
-    did.current = true;
+    let ignore = false;
+    setLoading(true);
     (async () => {
       try {
         await initCsrf();
-        const res = await getMenus();
+        const res = await getMenus(); // if your api uses fetch/axios with AbortController, you can pass a signal
         const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setMenus(arr);
+        if (!ignore) {
+          setMenus(arr);
+          setErr(null);
+        }
       } catch (e) {
-        console.error(e);
-        setErr("Failed to load menu detail");
+        if (!ignore) {
+          console.error(e);
+          setErr("Failed to load menu detail");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     })();
-  }, []);
+    return () => { ignore = true; };
+  }, [menuId]);
 
   const menu = menus.find((m) => String(m.id) === String(menuId));
   const children = useMemo(
@@ -37,9 +43,14 @@ export default function BusinessMenuDetail() {
     [menus, menuId]
   );
 
-  if (loading)
-    return <div className="p-6 text-sm text-neutral-300">Loading…</div>;
-  if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
+  if (loading) {
+      return (
+        <div className="flex items-center justify-center py-24" aria-busy="true">
+          <Loader />
+        </div>
+      );
+    }
+  if (err) return <div role="alert" className="p-6 text-sm text-red-400">{err}</div>;
 
   return (
     <div className="bd-container space-y-5">
@@ -59,7 +70,6 @@ export default function BusinessMenuDetail() {
         <div className="text-neutral-400">{menu.description}</div>
       )}
 
-      {/* Children grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {children.map((c) => (
           <Card

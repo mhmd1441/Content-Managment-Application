@@ -3,12 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   initCsrf,
   getMenus,
-  show_menu,
-  update_menu,
+  get_contentSections,
+  show_contentSection,
+  update_contentSection,
 } from "@/services/api.js";
-import Loader from "../../../src/lib/loading.jsx";
+import Loader from "@/lib/loading.jsx";
 
-function SimpleSelect({ id, value, onChange, options, placeholder = "Select..." }) {
+/* ---------- UI: SimpleSelect ---------- */
+function SimpleSelect({ id, value, onChange, options, placeholder = "Select…" }) {
   const [open, setOpen] = useState(false);
   const label = useMemo(
     () => options.find(o => String(o.value) === String(value))?.label ?? "",
@@ -65,20 +67,21 @@ function SimpleSelect({ id, value, onChange, options, placeholder = "Select..." 
 function buildTree(items) {
   const map = new Map(items.map(i => [i.id, { ...i, children: [] }]));
   const roots = [];
-  items.forEach(i => {
-    if (i.parent_id && map.has(i.parent_id)) map.get(i.parent_id).children.push(map.get(i.id));
-    else roots.push(map.get(i.id));
-  });
+  for (const i of items) {
+    const node = map.get(i.id);
+    if (i.parent_id && map.has(i.parent_id)) map.get(i.parent_id).children.push(node);
+    else roots.push(node);
+  }
   return { roots, map };
 }
-function flatten(roots) {
+function flatten(nodes) {
   const out = [];
-  (function walk(nodes, depth = 0) {
-    for (const n of nodes) {
-      out.push({ id: n.id, title: n.title, depth });
+  (function walk(ns, depth = 0) {
+    for (const n of ns) {
+      out.push({ id: n.id, label: `${depth ? "— ".repeat(depth) : ""}${n.subtitle ?? `#${n.id}`}`, depth });
       if (n.children?.length) walk(n.children, depth + 1);
     }
-  })(roots);
+  })(nodes);
   return out;
 }
 function collectDescendants(map, id, acc = new Set()) {
@@ -91,7 +94,7 @@ function collectDescendants(map, id, acc = new Set()) {
   return acc;
 }
 
-export default function UpdateMenuPage() {
+export default function UpdateContentSectionPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const myId = Number(id);
@@ -100,16 +103,19 @@ export default function UpdateMenuPage() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  const [allMenus, setAllMenus] = useState([]);
+  const [menus, setMenus] = useState([]);
+  const [sections, setSections] = useState([]);
 
   const [form, setForm] = useState({
-    title: "",
-    route: "",
+    subtitle: "",
+    description: "",
+    image_path: "",
     order: "",
-    status: "published",   // published | draft | archived
-    parent_id: "none",
-    position: "top",       // top | left
-    publish_now: false,    // if true, force publish + set published_at now
+    status: "published",     
+    expand_mode: "free",     
+    menu_id: null,           
+    parent_id: "none",     
+    publish_now: false,      
   });
 
   const statusOptions = useMemo(() => ([
@@ -118,58 +124,62 @@ export default function UpdateMenuPage() {
     { value: "archived",  label: "Archived" },
   ]), []);
 
-  const positionOptions = useMemo(() => ([
-    { value: "top",  label: "Top" },
-    { value: "left", label: "Left" },
+  const expandOptions = useMemo(() => ([
+    { value: "free",      label: "Free" },
+    { value: "expanded",  label: "Expanded" },
+    { value: "collapsed", label: "Collapsed" },
   ]), []);
 
-  // Build parent select options, excluding this menu and its descendants
+  const menuOptions = useMemo(
+    () => menus.map(m => ({ value: m.id, label: m.title ?? m.name ?? `Menu #${m.id}` })),
+    [menus]
+  );
+
   const parentOptions = useMemo(() => {
-    const { roots, map } = buildTree(allMenus);
+    if (!form.menu_id) return [{ value: "none", label: "— No parent —" }];
+    const scoped = sections.filter(s => Number(s.menu_id) === Number(form.menu_id));
+    const { roots, map } = buildTree(scoped);
     const blocked = new Set([myId]);
     collectDescendants(map, myId, blocked);
-
     const flat = flatten(roots).filter(p => !blocked.has(p.id));
-    const opts = [{ value: "none", label: "— No parent —" }].concat(
-      flat.map(p => ({
-        value: String(p.id),
-        label: `${p.depth > 0 ? "— ".repeat(p.depth) : ""}${p.title ?? `#${p.id}`}`,
-      }))
-    );
-    return opts;
-  }, [allMenus, myId]);
+    return [{ value: "none", label: "— No parent —" }, ...flat.map(p => ({ value: p.id, label: p.label }))];
+  }, [sections, form.menu_id, myId]);
 
-  // Load menu + list
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
         await initCsrf();
 
-        const [menusRes, menuRes] = await Promise.all([
+        const [mRes, sRes, oneRes] = await Promise.all([
           getMenus(),
-          show_menu(id),
+          get_contentSections(),
+          show_contentSection(id),
         ]);
 
-        const menus = Array.isArray(menusRes.data) ? menusRes.data : menusRes.data?.data || [];
-        const mRaw  = menuRes?.data?.data || menuRes?.data || {};
+        const m = Array.isArray(mRes.data) ? mRes.data : mRes.data?.data || [];
+        const s = Array.isArray(sRes.data) ? sRes.data : sRes.data?.data || [];
+        const raw = oneRes?.data?.data || oneRes?.data || {};
 
-        setAllMenus(menus);
+        setMenus(m);
+        setSections(s);
 
         setForm({
-          title:       mRaw.title ?? "",
-          route:       mRaw.route ?? "",
-          order:       String(mRaw.order ?? 0),
-          status:      mRaw.status ?? "published",
-          parent_id:   mRaw.parent_id == null ? "none" : String(mRaw.parent_id),
-          position:    mRaw.position ?? "top",
-          publish_now: false,   // explicit toggle; don't auto-publish on load
+          subtitle:     raw.subtitle ?? "",
+          description:  raw.description ?? "",
+          image_path:   raw.image_path ?? "",
+          order:        String(raw.order ?? 0),
+          status:       raw.status ?? "published",
+          expand_mode:  raw.expand_mode ?? "free",
+          menu_id:      raw.menu_id ?? (m[0]?.id ?? null),
+          parent_id:    raw.parent_id == null ? "none" : String(raw.parent_id),
+          publish_now:  false,
         });
 
         setErr("");
       } catch (e) {
         console.error(e);
-        setErr("Failed to load menu.");
+        setErr("Failed to load content section.");
       } finally {
         setLoading(false);
       }
@@ -177,41 +187,49 @@ export default function UpdateMenuPage() {
   }, [id]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErr("");
+  e.preventDefault();
+  setErr("");
 
-    // Basic validation
-    if (!form.title.trim()) return setErr("Title is required.");
-    if (form.route && !form.route.startsWith("/")) return setErr("Route must start with '/' or be empty.");
-    if (Number.isNaN(Number(form.order))) return setErr("Order must be a number.");
+  if (!form.menu_id) return setErr("Menu is required.");
+  if (!form.subtitle.trim()) return setErr("Subtitle is required.");
+  if (Number.isNaN(Number(form.order))) return setErr("Order must be a number.");
 
-    try {
-      setSaving(true);
-      await initCsrf();
-
-      const payload = {
-        title: form.title.trim(),
-        route: form.route.trim() || null,
-        order: Number(form.order) || 0,
-        status: form.status,
-        parent_id: (form.parent_id && form.parent_id !== "none") ? Number(form.parent_id) : null,
-        position: form.position,
-      };
-
-      if (form.publish_now) {
-        payload.status = "published";
-        payload.published_at = new Date().toISOString();
-      }
-
-      await update_menu(id, payload);
-      navigate("/super_dashboard/menu");
-    } catch (e) {
-      console.error(e);
-      setErr(e?.response?.data?.message || "Failed to update menu.");
-    } finally {
-      setSaving(false);
-    }
+  const payload = {
+    subtitle: form.subtitle.trim(),
+    description: form.description.trim() || null,
+    image_path: form.image_path.trim() || null,
+    order: Number(form.order) || 0,
+    status: form.status,
+    expand_mode: form.expand_mode,
+    menu_id: Number(form.menu_id),
+    parent_id: form.parent_id && form.parent_id !== "none" ? Number(form.parent_id) : null,
   };
+  if (form.publish_now) {
+    payload.status = "published";
+    payload.published_at = new Date().toISOString();
+  }
+
+  try {
+    setSaving(true);
+    await initCsrf();
+    console.log("POST /api/update_contentSection/", id, payload);
+    const res = await update_contentSection(id, payload);
+    if (res?.status >= 200 && res?.status < 300) {
+      navigate("/business_dashboard/content", { replace: true });
+      return;
+    }
+    setErr(`Unexpected status ${res?.status} ${res?.statusText || ""}`);
+  } catch (e) {
+    const status = e?.response?.status;
+    const body = e?.response?.data;
+    console.error("ContentSection update failed:", status, body);
+    setErr(status ? `${status} ${e.response.statusText || ""} — ${JSON.stringify(body)}`
+                  : `Network error — ${e?.message || "unknown"}`);
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   if (loading) {
     return (
@@ -222,9 +240,9 @@ export default function UpdateMenuPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6 text-white">
+    <div className="max-w-4xl mx-auto p-6 space-y-6 text-white">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Update Menu</h1>
+        <h1 className="text-xl font-semibold">Update Content Section</h1>
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -237,27 +255,37 @@ export default function UpdateMenuPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Title */}
-          <div className="space-y-2">
-            <label htmlFor="title">Title</label>
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="subtitle">Subtitle</label>
             <input
-              id="title"
-              value={form.title}
-              onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
+              id="subtitle"
+              value={form.subtitle}
+              onChange={(e) => setForm(f => ({ ...f, subtitle: e.target.value }))}
               className="w-full rounded-md border border-neutral-800 bg-black text-white px-3 py-2"
-              placeholder="e.g. Dashboard"
+              placeholder="e.g. E-Sim"
             />
           </div>
 
-          {/* Route */}
-          <div className="space-y-2">
-            <label htmlFor="route">Route</label>
-            <input
-              id="route"
-              value={form.route}
-              onChange={(e) => setForm(f => ({ ...f, route: e.target.value }))}
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              rows={5}
+              value={form.description}
+              onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))}
               className="w-full rounded-md border border-neutral-800 bg-black text-white px-3 py-2"
-              placeholder="/dashboard"
+              placeholder="Write a short description…"
+            />
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="image_path">Image path / URL</label>
+            <input
+              id="image_path"
+              value={form.image_path}
+              onChange={(e) => setForm(f => ({ ...f, image_path: e.target.value }))}
+              className="w-full rounded-md border border-neutral-800 bg-black text-white px-3 py-2"
+              placeholder="https://… or img/banner.png"
             />
           </div>
 
@@ -271,7 +299,6 @@ export default function UpdateMenuPage() {
               value={form.order}
               onChange={(e) => setForm(f => ({ ...f, order: e.target.value }))}
               className="w-full rounded-md border border-neutral-800 bg-black text-white px-3 py-2"
-              placeholder="0"
             />
           </div>
 
@@ -287,27 +314,39 @@ export default function UpdateMenuPage() {
             />
           </div>
 
-          {/* Parent */}
-          <div className="space-y-2 sm:col-span-1">
-            <label htmlFor="parent">Parent</label>
+          {/* Expand mode */}
+          <div className="space-y-2">
+            <label htmlFor="expand_mode">Expand mode</label>
+            <SimpleSelect
+              id="expand_mode"
+              value={form.expand_mode}
+              onChange={(v) => setForm(f => ({ ...f, expand_mode: v }))}
+              options={expandOptions}
+              placeholder="Select expand mode…"
+            />
+          </div>
+
+          {/* Menu */}
+          <div className="space-y-2">
+            <label htmlFor="menu">Menu</label>
+            <SimpleSelect
+              id="menu"
+              value={form.menu_id ?? ""}
+              onChange={(v) => setForm(f => ({ ...f, menu_id: v, parent_id: "none" }))}
+              options={menuOptions}
+              placeholder="Select menu…"
+            />
+          </div>
+
+          {/* Parent (scoped to menu, cycle-safe) */}
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="parent">Parent section</label>
             <SimpleSelect
               id="parent"
               value={form.parent_id}
               onChange={(v) => setForm(f => ({ ...f, parent_id: v }))}
               options={parentOptions}
-              placeholder="Select parent…"
-            />
-          </div>
-
-          {/* Position */}
-          <div className="space-y-2 sm:col-span-1">
-            <label htmlFor="position">Position</label>
-            <SimpleSelect
-              id="position"
-              value={form.position}
-              onChange={(v) => setForm(f => ({ ...f, position: v }))}
-              options={positionOptions}
-              placeholder="Select position…"
+              placeholder="— No parent —"
             />
           </div>
 
@@ -319,20 +358,14 @@ export default function UpdateMenuPage() {
               aria-label="Publish now"
               onClick={() => {
                 const next = !(form.publish_now || form.status === "published");
-                setForm(f => ({
-                  ...f,
-                  publish_now: next,
-                  status: next ? "published" : f.status,
-                }));
+                setForm(f => ({ ...f, publish_now: next, status: next ? "published" : f.status }));
               }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600
                 ${(form.publish_now || form.status === "published") ? "bg-green-500" : "bg-neutral-700"}`}
             >
-              <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white transition
-                  ${(form.publish_now || form.status === "published") ? "translate-x-5" : "translate-x-1"}`}
-              />
+              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition
+                ${(form.publish_now || form.status === "published") ? "translate-x-5" : "translate-x-1"}`} />
             </button>
           </div>
         </div>

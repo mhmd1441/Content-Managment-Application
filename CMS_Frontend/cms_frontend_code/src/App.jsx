@@ -71,7 +71,6 @@ export default function App() {
           <Route path="content_section/edit/:id" element={<UpdateContentSectionPage />} />
           </Route>
 
-
         <Route
           path="/business_dashboard"
           element={
@@ -90,6 +89,8 @@ export default function App() {
           <Route path="feedback" element={<Feedback />} />
           <Route path="menu/:menuId" element={<BusinessMenuDetail />} />
           <Route path="menu/:menuId/child/:childId" element={<BusinessContentList />} />
+          <Route path="menu/edit/:id" element={<UpdateMenuPage />} />
+          <Route path="content/edit/:id" element={<UpdateContentSectionPage />} />
           <Route path="users" element={<BusinessUsers />} />
           <Route path="profile" element={<BusinessProfile />} />
         </Route>

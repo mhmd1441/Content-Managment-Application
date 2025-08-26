@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   initCsrf,
   get_contentSections,
   getMenus,
-}  from "@/services/api.js";
+  delete_contentSection,
+} from "@/services/api.js";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Filter, ArrowUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, ArrowUpDown } from "lucide-react";
+import Loader from "@/lib/loading.jsx";
 
 const fmt = (v) => v ?? "—";
 
-export default function BusinessAllContent() {
+export default function AllContent() {
+  const nav = useNavigate();
+
   const [sections, setSections] = useState([]);
   const [menus, setMenus] = useState([]);
   const [q, setQ] = useState("");
@@ -22,33 +27,31 @@ export default function BusinessAllContent() {
   const toggle = (id) =>
     setExpandedById((p) => ({ ...p, [String(id)]: !p[String(id)] }));
 
+  async function load() {
+    try {
+      setLoading(true);
+      await initCsrf();
+      const [sRes, mRes] = await Promise.all([get_contentSections(), getMenus()]);
+      const s = Array.isArray(sRes.data) ? sRes.data : sRes.data?.data || [];
+      const m = Array.isArray(mRes.data) ? mRes.data : mRes.data?.data || [];
+      setSections(s);
+      setMenus(m);
+      setErr(null);
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to load content");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (did.current) return;
     did.current = true;
-    (async () => {
-      try {
-        await initCsrf();
-        const [sRes, mRes] = await Promise.all([
-          get_contentSections(),
-          getMenus(),
-        ]);
-        const s = Array.isArray(sRes.data) ? sRes.data : sRes.data?.data || [];
-        const m = Array.isArray(mRes.data) ? mRes.data : mRes.data?.data || [];
-        setSections(s);
-        setMenus(m);
-      } catch (e) {
-        console.error(e);
-        setErr("Failed to load content");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    load();
   }, []);
 
-  const byId = useMemo(
-    () => new Map(menus.map((x) => [String(x.id), x])),
-    [menus]
-  );
+  const byId = useMemo(() => new Map(menus.map((x) => [String(x.id), x])), [menus]);
 
   const items = useMemo(() => {
     let arr = sections.slice();
@@ -58,14 +61,42 @@ export default function BusinessAllContent() {
         (x) =>
           x.subtitle?.toLowerCase?.().includes(needle) ||
           x.description?.toLowerCase?.().includes(needle)
-      );
+      ); // Array.prototype.filter is non-mutating; returns a new array. :contentReference[oaicite:2]{index=2}
     }
     return arr;
   }, [sections, q]);
 
-  if (loading)
-    return <div className="p-6 text-sm text-neutral-300">Loading…</div>;
-  if (err) return <div className="p-6 text-sm text-red-400">{err}</div>;
+  function handleUpdate(item) {
+    nav(`/business_dashboard/content/edit/${item.id}`); // useNavigate for programmatic routing. :contentReference[oaicite:3]{index=3}
+  }
+
+  async function handleDelete(item) {
+    const ok = window.confirm(
+      `Delete content section "${item.subtitle ?? "(untitled)"}" (#${item.id})?\nThis cannot be undone.`
+    ); // Native confirm dialog. :contentReference[oaicite:4]{index=4}
+    if (!ok) return;
+
+    try {
+      await initCsrf();
+      await delete_contentSection(item.id);
+      // Option A: re-fetch everything (consistent)
+      await load();
+      // Option B (faster): optimistic update
+      // setSections((s) => s.filter((x) => x.id !== item.id));
+    } catch (e) {
+      console.error(e);
+      alert(e?.response?.data?.message || "Delete failed.");
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24" aria-busy="true">
+        <Loader />
+      </div>
+    );
+  }
+  if (err) return <div role="alert" className="p-6 text-sm text-red-400">{err}</div>;
 
   return (
     <div className="bd-container space-y-5">
@@ -80,11 +111,7 @@ export default function BusinessAllContent() {
 
       <div
         className="bd-hero"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
       >
         <div>
           <div className="bd-eyebrow">Content</div>
@@ -92,8 +119,8 @@ export default function BusinessAllContent() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Filter  className="cursor-pointer opacity-80 hover:opacity-100" />
-          <ArrowUpDown  className="cursor-pointer opacity-80 hover:opacity-100" />
+          <Filter className="cursor-pointer opacity-80 hover:opacity-100" />
+          <ArrowUpDown className="cursor-pointer opacity-80 hover:opacity-100" />
         </div>
       </div>
 
@@ -118,38 +145,32 @@ export default function BusinessAllContent() {
           return (
             <div key={item.id} className="bd-card p-4">
               <div className="bd-content-row flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                {/* Left: text */}
                 <div className="space-y-1">
-                  {/* Title: bold, underline, subtle bg */}
                   <div className="text-lg font-extrabold">
                     <span className="underline decoration-2 underline-offset-4 bg-neutral-800/60 rounded px-2 py-0.5">
                       {fmt(item.subtitle)}
                     </span>
                   </div>
 
-                  {/* Description: 2 lines + toggle */}
-                  <div
-                    className={`text-sm text-neutral-300 ${
-                      expanded ? "" : "bd-line-clamp-2"
-                    }`}
-                  >
+                  <div className={`text-sm text-neutral-300 ${expanded ? "" : "bd-line-clamp-2"}`}>
                     {fmt(item.description)}
                   </div>
-                  <br />
+
                   {item.description && String(item.description).length > 0 && (
                     <button
                       type="button"
                       onClick={() => toggle(item.id)}
-                      className="text-xs text-neutral-400 hover:text-neutral-200 underline"
+                      className="mt-1 text-xs text-neutral-400 hover:text-neutral-200 underline"
                     >
                       {expanded ? "Show less" : "Show more"}
                     </button>
                   )}
-                  <br />
-                  <br />
-                  {/* Badges: Type & Status */}
+
+                  {/* Badges */}
                   <div className="mt-2 flex flex-wrap gap-2">
                     <span className="inline-flex items-center rounded-full border border-neutral-700 bg-neutral-900/70 px-2 py-0.5 text-xs text-neutral-200">
-                      Type: {menuTitle}
+                      Menu: {menuTitle}
                     </span>
                     <span
                       className={
@@ -161,6 +182,27 @@ export default function BusinessAllContent() {
                     >
                       Status: {statusStr}
                     </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="bg-neutral-800 hover:bg-neutral-700"
+                      title="Update Content Section"
+                      onClick={() => handleUpdate(item)}
+                    >
+                      Update
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      title="Delete Content Section"
+                      onClick={() => handleDelete(item)}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
 
@@ -187,9 +229,7 @@ export default function BusinessAllContent() {
           );
         })}
 
-        {items.length === 0 && (
-          <div className="text-neutral-500">No content found.</div>
-        )}
+        {items.length === 0 && <div className="text-neutral-500">No content found.</div>}
       </div>
     </div>
   );

@@ -204,7 +204,7 @@ export default function UpdateMenuPage() {
       }
 
       await update_menu(id, payload);
-      navigate("/super_dashboard/menu");
+      navigate("/business_dashboard/menu");
     } catch (e) {
       console.error(e);
       setErr(e?.response?.data?.message || "Failed to update menu.");
