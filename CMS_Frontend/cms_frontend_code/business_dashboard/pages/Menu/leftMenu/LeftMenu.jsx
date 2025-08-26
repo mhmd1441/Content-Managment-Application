@@ -14,9 +14,9 @@ import SourceIcon from '@mui/icons-material/Source';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 const mainListItems = [
-  { text: 'Analytics', icon: <AnalyticsIcon />, path: '/business_dashboard/analyticsDashboard' },
-  { text: 'Add Menu', icon: <MenuIcon />, path: '/business_dashboard/addMenu' },
-  { text: 'Add Content Section', icon: <SourceIcon />, path: '/business_dashboard/addContentSection' },
+  { text: 'Analytics', icon: <AnalyticsIcon />, path: '/business_dashboard' },
+  { text: 'Add Menu', icon: <MenuIcon />, path: '/business_dashboard/menu/addMenu' },
+  { text: 'Add Content Section', icon: <SourceIcon />, path: '/business_dashboard/content/addContentSection' },
 ];
 
 const secondaryListItems = [

@@ -80,17 +80,17 @@ export default function App() {
             </div>
           }
         >
-          <Route index element={<BusinessMenus />} />
-          <Route path="analyticsDashboard" element={<AnalyticsDashboard />} />
-          <Route path="addContentSection" element={<AddContentSection />} />
-          <Route path="addMenu" element={<AddMenu />} />
+          <Route index element={<AnalyticsDashboard />} />
+          <Route path="menu" element={<BusinessMenus />} />
+          <Route path="content" element={<BusinessAllContent />} />
+          <Route path="content/addContentSection" element={<AddContentSection />} />
+          <Route path="menu/addMenu" element={<AddMenu />} />
           <Route path="settings" element={<Settings />} />
           <Route path="about" element={<About />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="menu/:menuId" element={<BusinessMenuDetail />} />
           <Route path="menu/:menuId/child/:childId" element={<BusinessContentList />} />
           <Route path="users" element={<BusinessUsers />} />
-          <Route path="content" element={<BusinessAllContent />} />
           <Route path="profile" element={<BusinessProfile />} />
         </Route>
 

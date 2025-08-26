@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import  { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,7 +14,6 @@ import {
   GripVertical, MoreHorizontal
 } from "lucide-react";
 
-/* ---------- utils ---------- */
 const fmtNum = (n) =>
   typeof n === "number"
     ? n.toLocaleString(undefined, { maximumFractionDigits: 0 })
@@ -41,7 +40,6 @@ function makeSeries(days) {
   return out;
 }
 
-/* ---------- tiny UI pieces ---------- */
 function StatCard({ title, value, hint, delta, positive, icon }) {
   return (
     <div className="rounded-xl border border-[#27272A] bg-[#18181B] p-5 shadow-sm">
@@ -245,24 +243,6 @@ export default function AnalyticsDashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-6 rounded-xl border border-[#27272A] bg-[#18181B] shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <SectionTab active label="Outline" />
-              <SectionTab label="Past Performance" count={3} />
-              <SectionTab label="Key Personnel" count={2} />
-              <SectionTab label="Focus Documents" />
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="rounded-md border border-[#27272A] bg-[#0F0F0F] px-3 py-2 text-sm text-[#A1A1AA] hover:text-white">
-                Customize Columns
-              </button>
-              <button className="rounded-md border border-[#1f3b72] bg-[#3B82F6] px-3 py-2 text-sm text-white">
-                + Add Section
-              </button>
-            </div>
-          </div>
-
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-t border-[#27272A]">
               <thead className="bg-[#18181B]/80 sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-[#18181B]/75">
@@ -374,6 +354,5 @@ export default function AnalyticsDashboard() {
         </div>
 
       </div>
-    </div>
   );
 }

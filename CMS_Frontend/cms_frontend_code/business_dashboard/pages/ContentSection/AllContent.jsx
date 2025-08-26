@@ -3,7 +3,7 @@ import {
   initCsrf,
   get_contentSections,
   getMenus,
-} from "../../../src/services/api";
+}  from "@/services/api.js";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Filter, ArrowUpDown } from "lucide-react";
@@ -18,7 +18,6 @@ export default function BusinessAllContent() {
   const [err, setErr] = useState(null);
   const did = useRef(false);
 
-  // per-item expand state (no hooks inside loops)
   const [expandedById, setExpandedById] = useState({});
   const toggle = (id) =>
     setExpandedById((p) => ({ ...p, [String(id)]: !p[String(id)] }));

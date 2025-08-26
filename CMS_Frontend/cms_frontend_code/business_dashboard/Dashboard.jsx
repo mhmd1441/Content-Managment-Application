@@ -1,30 +1,41 @@
+import React, { useEffect, useRef, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import AppNavbar from "../super_dashboard/components/AppNavbar";
 import AppTheme from "../shared-theme/AppTheme";
 import { Outlet } from "react-router-dom";
 import "./styles/business.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import SideMenu from "./pages/Menu/SideMenu.jsx";
 
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
-
 export default function BusinessDashboard(props) {
+  const [open, setOpen] = useState(null);
+  const navRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (!navRef.current?.contains(e.target)) setOpen(null);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  useEffect(() => setOpen(null), [location.pathname]);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && setOpen(null);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  const toggle = (id) => setOpen((cur) => (cur === id ? null : id));
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
 
-      <Box
-        className="bd-wrap"
-        sx={{ display: "flex"}}
-      >
+      <Box className="bd-wrap" sx={{ display: "flex" }}>
         <SideMenu />
         <Box
           component="main"
@@ -40,46 +51,96 @@ export default function BusinessDashboard(props) {
         >
           <AppNavbar />
 
-          <Box className="bd-topbar">
-            <div className="bd-topbar-inner">
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <NavigationMenuLink asChild>
-                        <Link to="/business_dashboard">All Menus</Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+          <div className="bd-topbar border-b border-neutral-800 bg-neutral-950/90 backdrop-blur">
+            <div
+              ref={navRef}
+              className="bd-topbar-inner mx-auto grid h-14 grid-cols-3 items-center px-4"
+            >
+              <div />
 
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>
-                      Content Section
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <NavigationMenuLink asChild>
-                        <Link to="/business_dashboard/content">
+              <div className="flex items-center justify-center gap-8">
+                <div className="relative">
+                  <button
+                    onClick={() => toggle("menu")}
+                    aria-haspopup="menu"
+                    aria-expanded={open === "menu"}
+                    className="rounded-md px-4 py-2 text-[15px] md:text-base text-neutral-100 hover:bg-neutral-800/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600"
+                  >
+                    Menu
+                  </button>
+                  {open === "menu" && (
+                    <div className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-lg border border-neutral-800 bg-black text-white shadow-xl">
+                      <nav className="py-2" role="menu" aria-label="Menu">
+                        <Link
+                          to="menu"
+                          role="menuitem"
+                          className="block px-4 py-2.5 hover:bg-neutral-800/70"
+                        >
+                          All Menus
+                        </Link>
+                      </nav>
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <button
+                    onClick={() => toggle("content")}
+                    aria-haspopup="menu"
+                    aria-expanded={open === "content"}
+                    className="rounded-md px-4 py-2 text-[15px] md:text-base text-neutral-100 hover:bg-neutral-800/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600"
+                  >
+                    Content Section
+                  </button>
+                  {open === "content" && (
+                    <div className="absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-lg border border-neutral-800 bg-black text-white shadow-xl">
+                      <nav className="py-2" role="menu" aria-label="Content">
+                        <Link
+                          to="content"
+                          role="menuitem"
+                          className="block px-4 py-2.5 hover:bg-neutral-800/70"
+                        >
                           Browse All Content
                         </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
+                      </nav>
+                    </div>
+                  )}
+                </div>
 
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger>Profile</NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <NavigationMenuLink asChild>
-                        <Link to="/business_dashboard/profile">
+                <div className="relative">
+                  <button
+                    onClick={() => toggle("profile")}
+                    aria-haspopup="menu"
+                    aria-expanded={open === "profile"}
+                    className="rounded-md px-4 py-2 text-[15px] md:text-base text-neutral-100 hover:bg-neutral-800/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-600"
+                  >
+                    Profile
+                  </button>
+                  {open === "profile" && (
+                    <div className="absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-lg border border-neutral-800 bg-black text-white shadow-xl">
+                      <nav className="py-2" role="menu" aria-label="Profile">
+                        <Link
+                          to="profile"
+                          role="menuitem"
+                          className="block px-4 py-2.5 hover:bg-neutral-800/70"
+                        >
                           Edit Profile
                         </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+                      </nav>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="justify-self-end">
+                <input
+                  type="search"
+                  placeholder="Search…"
+                  className="hidden md:block w-64 rounded-md border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-700"
+                />
+              </div>
             </div>
-          </Box>
+          </div>
 
           <Box
             sx={{

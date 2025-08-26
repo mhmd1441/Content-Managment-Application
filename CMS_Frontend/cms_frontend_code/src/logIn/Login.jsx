@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./LogIn.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import touchLogo from "../assets/TouchLogo.png";
-
-
 
 export default function Login() {
   const navigate = useNavigate();
@@ -32,7 +30,7 @@ export default function Login() {
         setError("Login failed. Try again.");
       }
     }
-};
+  };
 
   return (
     <div className="auth-wrapper">
@@ -46,33 +44,38 @@ export default function Login() {
               {error}
             </div>
           )}
+            <input
+              type="email"
+              placeholder="Email"
+              className="input-field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+            <br></br>
+            <input
+              type="password"
+              placeholder="Password"
+              className="input-field"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
 
-          <input
-            type="email"
-            placeholder="Email"
-            className="input-field"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="input-field"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-          />
+            <div className="options-row">
+              <button type="button" className="text-btn">
+                Forgot your password?
+              </button>
+            </div>
 
-          <div className="options-row">
-            <button type="button" className="text-btn">
-              Forgot your password?
+            <button
+              type="button"
+              className="submit-btn"
+              onClick={handleLogin}
+              disabled={authBusy}
+            >
+              Log In
             </button>
-          </div>
-
-          <button type="button" className="submit-btn" onClick={handleLogin} disabled={authBusy}>
-            Log In
-          </button>
         </div>
 
         <div className="auth-right">
