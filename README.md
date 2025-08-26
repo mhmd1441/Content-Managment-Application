@@ -29,16 +29,11 @@ This repository contains \*\*showcase assets only\*\* (no source code).
 \*(Details intentionally omitted.)\*
 
 
-
-\## Screens
-
-<p align="center"><img src="docs/SuperAdmin\_Graph.png" width="900" alt="Super Admin (Graph)"></p>
-
-<p align="center"><img src="docs/SuperAdmin\_Page.png" width="900" alt="Super Admin (Page)"></p>
-
-<p align="center"><img src="docs/BusinessAdmin\_Page.png" width="900" alt="Business Admin (Page)"></p>
-
-<p align="center"><img src="docs/User\_Page.png" width="900" alt="User (Page)"></p>
+## Screens
+![Super Admin (Graph)](docs/SuperAdmin_Graph.png)
+![Super Admin (Page)](docs/SuperAdmin_Page.png)
+![Business Admin (Page)](docs/BusinessAdmin_Page.png)
+![User (Page)](docs/User_Page.png)
 
 
 
