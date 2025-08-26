@@ -1,12 +1,12 @@
 \# Touch CMS — Public Showcase
 
+\*\*TL;DR:\*\* Modular CMS for multi-role content workflows (Super Admin / Business Admin / User).  
+
+This repository contains \*\*showcase assets only\*\* (no source code).
 
 
-\*\*TL;DR:\*\* Modular CMS for multi-role content workflows (Super Admin / Business Admin / User). This repo is a \*\*showcase\*\* of the project, not the full source.
 
-
-
-\## What it does 
+\## What it does
 
 \- Centralizes content creation, approval, and publishing
 
@@ -18,27 +18,27 @@
 
 
 
-\## How it’s built 
+\## How it’s built
 
 \- Backend: REST API
 
 \- Frontend: SPA UI
 
-\- Data: Relational DB
+\- Data: Relational DB  
 
 \*(Details intentionally omitted.)\*
 
 
 
-\## Screens 
+\## Screens
 
-!\[Super Admin (Graph)](docs/SuperAdmin\_Graph.png)
+<p align="center"><img src="docs/SuperAdmin\_Graph.png" width="900" alt="Super Admin (Graph)"></p>
 
-!\[Super Admin (Page)](docs/SuperAdmin\_Page.png)
+<p align="center"><img src="docs/SuperAdmin\_Page.png" width="900" alt="Super Admin (Page)"></p>
 
-!\[Business Admin (Page)](docs/BusinessAdmin\_Page.png)
+<p align="center"><img src="docs/BusinessAdmin\_Page.png" width="900" alt="Business Admin (Page)"></p>
 
-!\[User (Page)](docs/User\_Page.png)
+<p align="center"><img src="docs/User\_Page.png" width="900" alt="User (Page)"></p>
 
 
 
@@ -52,7 +52,7 @@
 
 \## My role
 
-Backend design, DB modeling, auth flows, SPA UI, CI/CD basics.
+Backend design, frontend design, DB modeling, auth flows, SPA UI, CI/CD basics.
 
 
 
@@ -60,15 +60,13 @@ Backend design, DB modeling, auth flows, SPA UI, CI/CD basics.
 
 Copyright © 2025 Mohamad Moumneh. \*\*All rights reserved.\*\*  
 
-This showcase is for review only. No copying, reuse, or distribution without written permission.
+This showcase is for review only. No copying, reuse, or distribution without written permission.  
 
 See \*\*LICENSE\*\* for full terms.
 
 
 
 \*\*Contact:\*\* \[mmoumneh14@gmail.com](mailto:mmoumneh14@gmail.com) • \[LinkedIn](https://www.linkedin.com/in/mhmdmoumneh)
-
-
 
 
 
