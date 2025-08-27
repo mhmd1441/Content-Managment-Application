@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Menu;
 use App\Traits\API_response;
@@ -114,8 +115,18 @@ class MenuApiController extends Controller
         return $this->sendResponse("Menu deleted Successfully", []);
     }
 
-    public function total()
+    public function totalMenus()
     {
         return Menu::all()->count();
+    }
+    public function newMenusThisMonth()
+    {
+        $now = Carbon::now();
+
+        $count = Menu::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+
+        return response()->json(['count' => $count]);
     }
 }

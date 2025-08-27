@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Traits\API_response;
@@ -97,5 +98,20 @@ class DepartmentApiController extends Controller
         $obj->delete();
 
         return $this->sendResponse("Department deleted Successfully", []);
+    }
+    public function totalDepartments()
+    {
+        return Department::all()->count();
+    }
+
+    public function newDepartmentsThisMonth()
+    {
+        $now = Carbon::now();
+
+        $count = Department::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+
+        return response()->json(['count' => $count]);
     }
 }

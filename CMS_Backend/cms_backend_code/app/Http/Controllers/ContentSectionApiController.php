@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\contentSection;
 use App\Traits\API_response;
@@ -119,5 +121,21 @@ class ContentSectionApiController extends Controller
         $obj->delete();
 
         return $this->sendResponse("contentSection deleted Successfully", []);
+    }
+
+    public function totalContentSections()
+    {
+        return contentSection::all()->count();
+    }
+
+    public function newContentSectionThisMonth()
+    {
+        $now = Carbon::now();
+
+        $count = contentSection::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+
+        return response()->json(['count' => $count]);
     }
 }
