@@ -3,8 +3,9 @@ import {
   initCsrf,
   get_contentSections,
   delete_contentSection,
+  get_total_contentSection,
+  get_new_contentSection,
 } from "@/services/api.js";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Loader from "@/lib/loading.jsx";
@@ -67,6 +68,8 @@ export default function ContentSectionList() {
   const [selected, setSelected] = useState(new Set());
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
+  const [totalContentSections, setTotalContentSections] = useState(0);
+  const [newSectionsThisMonth, setNewSectionsThisMonth] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,9 +78,30 @@ export default function ContentSectionList() {
     (async () => {
       try {
         await initCsrf();
-        const res = await get_contentSections();
-        const flat = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        const [listRes, totalRes, newRes] = await Promise.all([
+          get_contentSections(),
+          get_total_contentSection(),
+          get_new_contentSection(),
+        ]);
+
+        const flat = Array.isArray(listRes.data)
+          ? listRes.data
+          : listRes.data?.data || [];
         setTree(buildTree(flat));
+
+        setTotalContentSections(
+          typeof totalRes.data === "number"
+            ? totalRes.data
+            : totalRes.data?.total ??
+                totalRes.data?.total_content_sections ??
+                flat.length
+        );
+
+        setNewSectionsThisMonth(
+          typeof newRes.data === "number"
+            ? newRes.data
+            : newRes.data?.count ?? newRes.data?.new_content_sections ?? 0
+        );
       } catch (e) {
         console.error(e);
         setErr("Failed to load Content Sections");
@@ -145,9 +169,31 @@ export default function ContentSectionList() {
     setLoading(true);
     try {
       await initCsrf();
-      const res = await get_contentSections();
-      const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-     setTree(buildTree(arr));        
+      const [listRes, totalRes, newRes] = await Promise.all([
+        get_contentSections(),
+        get_total_contentSection(),
+        get_new_contentSection(),
+      ]);
+
+      const arr = Array.isArray(listRes.data)
+        ? listRes.data
+        : listRes.data?.data || [];
+      setTree(buildTree(arr));
+
+      setTotalContentSections(
+        typeof totalRes.data === "number"
+          ? totalRes.data
+          : totalRes.data?.total ??
+              totalRes.data?.total_content_sections ??
+              arr.length
+      );
+
+      setNewSectionsThisMonth(
+        typeof newRes.data === "number"
+          ? newRes.data
+          : newRes.data?.count ?? newRes.data?.new_content_sections ?? 0
+      );
+
       setErr(null);
     } catch (e) {
       console.error(e);
@@ -172,38 +218,51 @@ export default function ContentSectionList() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Total Content Sections
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {rows.length}
-          </CardContent>
-        </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Content Sections This Month
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">15</CardContent>
-        </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">Archived</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">8</CardContent>
-        </Card>
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">Drafts</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">4</CardContent>
-        </Card>
+
+
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">
+            Total content sections
+          </div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {totalContentSections?.toLocaleString?.() ?? totalContentSections}
+          </div>
+        </div>
+
+
+
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">New this month</div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {newSectionsThisMonth?.toLocaleString?.() ?? newSectionsThisMonth}
+          </div>
+        </div>
       </div>
+
+
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">

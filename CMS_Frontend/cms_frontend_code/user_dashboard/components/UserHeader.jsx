@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link,useNavigate } from "react-router-dom";
-import { Settings, User } from "lucide-react"; // ✅ icons only
+import { Link, useNavigate } from "react-router-dom";
+import { Settings, User } from "lucide-react";
 import "../styles/user.css";
 import TouchLogo from "@/assets/TouchLogo.png";
 import { useAuth } from "../../src/auth/AuthContext";
 import * as React from "react";
-
+import { endActivitySession } from "@/activity/ActivityTracker.jsx";
 
 export default function UserHeader() {
   const [open, setOpen] = useState(false);
@@ -13,8 +13,6 @@ export default function UserHeader() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { logout } = useAuth();
   const navigate = useNavigate();
-  
-  
 
   // close on outside click or ESC
   useEffect(() => {
@@ -37,16 +35,16 @@ export default function UserHeader() {
     setAnchorEl(null);
   };
 
-const handleLogout = async () => {
+  const handleLogout = async () => {
     handleClose();
     try {
+      await endActivitySession("logout");
       await logout();
     } catch (err) {
       console.error("Logout failed:", err);
     }
     navigate("/login", { replace: true });
   };
-
 
   return (
     <header className="ud-topbar">
@@ -60,7 +58,7 @@ const handleLogout = async () => {
               e.currentTarget.style.display = "none";
             }}
           />
-          <br/>
+          <br />
           <span className="ud-brand-text">Touch</span>
         </Link>
 
@@ -97,9 +95,13 @@ const handleLogout = async () => {
                 >
                   Profile
                 </Link>
-                  <button  className="ud-menu-label" role="presentation"onClick={handleLogout}>
-                    Log Out
-                  </button>
+                <button
+                  className="ud-menu-label"
+                  role="presentation"
+                  onClick={handleLogout}
+                >
+                  Log Out
+                </button>
               </div>
             )}
           </div>

@@ -1,12 +1,13 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { LineChart } from '@mui/x-charts/LineChart';
+import * as React from "react";
+import PropTypes from "prop-types";
+import { useTheme } from "@mui/material/styles";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { LineChart } from "@mui/x-charts/LineChart";
+import { analytics_sessions_by_role } from "@/services/api";
 
 function AreaGradient({ color, id }) {
   return (
@@ -18,30 +19,44 @@ function AreaGradient({ color, id }) {
     </defs>
   );
 }
-
 AreaGradient.propTypes = {
   color: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
 };
 
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString('en-US', {
-    month: 'short',
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
-export default function SessionsChart() {
+export default function SessionsChart({
+  days = 30,
+  parentPath = "/super_dashboard",
+}) {
   const theme = useTheme();
-  const data = getDaysInMonth(8, 2025);
+  const [labels, setLabels] = React.useState([]);
+  const [sa, setSa] = React.useState([]); // super admin
+  const [ba, setBa] = React.useState([]); // business admin
+  const [us, setUs] = React.useState([]); // user
+  const [total, setTotal] = React.useState(0);
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await analytics_sessions_by_role({
+          days,
+          parent_path: parentPath,
+        });
+        if (!mounted) return;
+        setLabels(data.labels || []);
+        setSa(data.series?.super_admin || []);
+        setBa(data.series?.business_admin || []);
+        setUs(data.series?.user || []);
+        setTotal(data.totals?.all || 0);
+      } catch (err) {
+        console.error("analytics fetch failed", err?.response?.data || err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [days, parentPath]);
 
   const colorPalette = [
     theme.palette.primary.light,
@@ -50,35 +65,36 @@ export default function SessionsChart() {
   ];
 
   return (
-    <Card variant="outlined" sx={{ width: '100%' }}>
+    <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Sessions
         </Typography>
-        <Stack sx={{ justifyContent: 'space-between' }}>
+        <Stack sx={{ justifyContent: "space-between" }}>
           <Stack
             direction="row"
             sx={{
-              alignContent: { xs: 'center', sm: 'flex-start' },
-              alignItems: 'center',
+              alignContent: { xs: "center", sm: "flex-start" },
+              alignItems: "center",
               gap: 1,
             }}
           >
             <Typography variant="h4" component="p">
-              13,277
+              {total.toLocaleString()}
             </Typography>
             <Chip size="small" color="success" label="+35%" />
           </Stack>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Sessions per day for the last 30 days
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            Sessions per day for the last {days} days
           </Typography>
         </Stack>
+
         <LineChart
           colors={colorPalette}
           xAxis={[
             {
-              scaleType: 'point',
-              data,
+              scaleType: "point",
+              data: labels,
               tickInterval: (index, i) => (i + 1) % 5 === 0,
               height: 24,
             },
@@ -86,45 +102,33 @@ export default function SessionsChart() {
           yAxis={[{ width: 50 }]}
           series={[
             {
-              id: 'direct',
-              label: 'Direct',
+              id: "direct", // keep id for your CSS gradient
+              label: "Super Admin", // new label
               showMark: false,
-              curve: 'linear',
-              stack: 'total',
+              curve: "linear",
+              stack: "total",
               area: true,
-              stackOrder: 'ascending',
-              data: [
-                300, 900, 600, 1200, 1500, 1800, 2400, 2100, 2700, 3000, 1800, 3300,
-                3600, 3900, 4200, 4500, 3900, 4800, 5100, 5400, 4800, 5700, 6000,
-                6300, 6600, 6900, 7200, 7500, 7800, 8100,
-              ],
+              stackOrder: "ascending",
+              data: sa,
             },
             {
-              id: 'referral',
-              label: 'Referral',
+              id: "referral",
+              label: "Business Admin",
               showMark: false,
-              curve: 'linear',
-              stack: 'total',
+              curve: "linear",
+              stack: "total",
               area: true,
-              stackOrder: 'ascending',
-              data: [
-                500, 900, 700, 1400, 1100, 1700, 2300, 2000, 2600, 2900, 2300, 3200,
-                3500, 3800, 4100, 4400, 2900, 4700, 5000, 5300, 5600, 5900, 6200,
-                6500, 5600, 6800, 7100, 7400, 7700, 8000,
-              ],
+              stackOrder: "ascending",
+              data: ba,
             },
             {
-              id: 'organic',
-              label: 'Organic',
+              id: "organic",
+              label: "User",
               showMark: false,
-              curve: 'linear',
-              stack: 'total',
-              stackOrder: 'ascending',
-              data: [
-                1000, 1500, 1200, 1700, 1300, 2000, 2400, 2200, 2600, 2800, 2500,
-                3000, 3400, 3700, 3200, 3900, 4100, 3500, 4300, 4500, 4000, 4700,
-                5000, 5200, 4800, 5400, 5600, 5900, 6100, 6300,
-              ],
+              curve: "linear",
+              stack: "total",
+              stackOrder: "ascending",
+              data: us,
               area: true,
             },
           ]}
@@ -132,15 +136,9 @@ export default function SessionsChart() {
           margin={{ left: 0, right: 20, top: 20, bottom: 0 }}
           grid={{ horizontal: true }}
           sx={{
-            '& .MuiAreaElement-series-organic': {
-              fill: "url('#organic')",
-            },
-            '& .MuiAreaElement-series-referral': {
-              fill: "url('#referral')",
-            },
-            '& .MuiAreaElement-series-direct': {
-              fill: "url('#direct')",
-            },
+            "& .MuiAreaElement-series-organic": { fill: "url('#organic')" },
+            "& .MuiAreaElement-series-referral": { fill: "url('#referral')" },
+            "& .MuiAreaElement-series-direct": { fill: "url('#direct')" },
           }}
           hideLegend
         >

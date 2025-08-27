@@ -1,6 +1,7 @@
 import Copyright from "../internals/components/Copyright";
 import PageViewsBarChart from "./PageViewsBarChart";
 import SessionsChart from "./SessionsChart";
+import SessionsTable from "./SessionsTable";
 import StatCard from "./StatCard";
 import { get_new_users } from "../../src/services/api.js";
 import { useEffect, useState } from "react";
@@ -57,7 +58,7 @@ const cards = [
 
         <div className="col-span-12 md:col-span-6">
           <SessionsChart />
-          <h2 className="text-base font-medium mb-2">Sessions Table</h2>
+          <SessionsTable />
         </div>
         <div className="col-span-12 md:col-span-6">
           <PageViewsBarChart />

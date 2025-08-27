@@ -11,6 +11,7 @@ import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import MenuButton from "./MenuButton";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../src/auth/AuthContext";
+import { endActivitySession } from "@/activity/ActivityTracker.jsx";
 
 const MenuItem = styled(MuiMenuItem)({
   margin: "2px 0",
@@ -21,7 +22,7 @@ export default function OptionsMenu() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const open = Boolean(anchorEl);
-  
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -31,6 +32,7 @@ export default function OptionsMenu() {
   const handleLogout = async () => {
     handleClose();
     try {
+      await endActivitySession("logout");
       await logout();
     } catch (err) {
       console.error("Logout failed:", err);

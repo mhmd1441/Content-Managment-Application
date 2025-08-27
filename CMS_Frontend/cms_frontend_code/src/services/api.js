@@ -22,6 +22,7 @@ export const register = (data) => api.post("/register", data);
 export const me = () => api.get("/api/me");
 export const logout = () => api.post("/logout");
 
+
 export const get_users = () => api.get("/api/get_users");
 export const show_user = (id) => api.get(`/api/show_user/${id}`);
 export const save_user = (payload) => api.post("/api/save_user", payload);
@@ -45,6 +46,8 @@ export const save_contentSection = (payload) =>api.post("/api/save_contentSectio
 export const show_contentSection = (id) =>api.get(`/api/show_contentSection/${id}`);
 export const update_contentSection = (id, payload) => api.put(`/api/update_contentSection/${id}`, payload);
 export const delete_contentSection = (id) => api.delete(`/api/delete_contentSection/${id}`);
+export const get_new_contentSection = () => api.get("/api/get_new_contentSection");
+export const get_total_contentSection = () => api.get("/api/get_total_contentSection");
 
 
 export const get_departments = () => api.get("/api/get_departments");
@@ -52,4 +55,15 @@ export const save_department = (payload) =>api.post("/api/save_department", payl
 export const show_department = (id) => api.get(`/api/show_department/${id}`);
 export const update_department = (id, payload) => api.put(`/api/update_department/${id}`, payload);
 export const delete_department = (id) => api.delete(`/api/delete_department/${id}`);
+export const get_new_department = () => api.get("/api/get_new_department");
+export const get_total_departments = () => api.get("/api/get_total_departments");
 
+
+// --- Activity tracking APIs ---
+export const activity_session_start = (payload) => api.post("/api/activity/session/start", payload);
+export const activity_heartbeat     = (payload) => api.post("/api/activity/heartbeat", payload);
+export const activity_pageview_start= (payload) => api.post("/api/activity/pageview/start", payload);
+export const activity_pageview_end  = (payload) => api.post("/api/activity/pageview/end", payload);
+export const activity_session_end   = (payload) => api.post("/api/activity/session/end", payload);
+export const analytics_sessions_by_role = (params) =>api.get("/api/activity/analytics/sessions-by-role", { params });
+export const activity_sessions_table = (params) =>api.get("/api/activity/table", { params });

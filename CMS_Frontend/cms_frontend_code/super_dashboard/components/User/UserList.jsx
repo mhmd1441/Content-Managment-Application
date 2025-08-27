@@ -104,8 +104,7 @@ export default function UserList() {
   }, []);
 
   const totalUsersDerived = useMemo(() => rowsRaw.length, [rowsRaw]);
-  const totalUsersDisplay =
-    totalUsersDerived > 0 ? totalUsersDerived : totalUser;
+  const totalUsersDisplay =totalUsersDerived > 0 ? totalUsersDerived : totalUser;
 
   const rows = useMemo(() => {
     let r = rowsRaw.slice();
@@ -161,21 +160,6 @@ export default function UserList() {
     }
   };
 
-  const cards = [
-    {
-      title: "New Users This Month",
-      value: String(newUsers),
-      trend: "up",
-      data: [],
-    },
-    {
-      title: "Total Users",
-      value: String(totalUsersDisplay),
-      trend: "up",
-      data: [],
-    },
-  ];
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24" aria-busy="true">
@@ -194,12 +178,43 @@ export default function UserList() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-12 gap-4 mb-4">
-        {cards.map((card, index) => (
-          <div key={index} className="col-span-12 sm:col-span-6 lg:col-span-3">
-            <StatCard {...card} />
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
           </div>
-        ))}
+
+          <div className="text-[0.95rem] text-neutral-300">
+            Total Users
+          </div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {totalUsersDisplay?.toLocaleString?.() ?? totalUsersDisplay}
+          </div>
+        </div>
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">New this month</div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {newUsers?.toLocaleString?.() ?? newUsers}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

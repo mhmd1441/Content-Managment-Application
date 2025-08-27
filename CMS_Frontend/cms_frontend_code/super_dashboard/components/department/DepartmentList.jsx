@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { initCsrf, get_departments,delete_department }  from "@/services/api.js";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  initCsrf,
+  get_departments,
+  delete_department,
+  get_total_departments,
+  get_new_department,
+} from "@/services/api.js";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +35,6 @@ import {
 import Loader from "../../../src/lib/loading.jsx";
 import { useNavigate } from "react-router-dom";
 
-
-
 const fmt = (v) =>
   v === null || v === undefined || v === "" ? "—" : String(v);
 
@@ -46,6 +49,8 @@ export default function DepartmentList() {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(new Set());
+  const [totalDepts, setTotalDepts] = useState(0);
+  const [newDeptsThisMonth, setNewDeptsThisMonth] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,9 +59,30 @@ export default function DepartmentList() {
     (async () => {
       try {
         await initCsrf();
-        const res = await get_departments();
-        const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setRowsRaw(arr);
+        const [listRes, totalRes, newRes] = await Promise.all([
+          get_departments(),
+          get_total_departments(),
+          get_new_department(),
+        ]);
+
+        const list = Array.isArray(listRes.data)
+          ? listRes.data
+          : listRes.data?.data || [];
+        setRowsRaw(list);
+
+        setTotalDepts(
+          typeof totalRes.data === "number"
+            ? totalRes.data
+            : totalRes.data?.total ??
+                totalRes.data?.total_departments ??
+                list.length
+        );
+
+        setNewDeptsThisMonth(
+          typeof newRes.data === "number"
+            ? newRes.data
+            : newRes.data?.count ?? newRes.data?.new_departments ?? 0
+        );
       } catch (e) {
         console.error(e);
         setErr("Failed to load Departments");
@@ -117,33 +143,52 @@ export default function DepartmentList() {
     rowsRaw.map((r) => (r.city || "").toLowerCase()).filter(Boolean)
   );
   const handleUpdate = (id) => {
-  if (!id) return;
-  navigate(`/super_dashboard/department/edit/${id}`);
-};
+    if (!id) return;
+    navigate(`/super_dashboard/department/edit/${id}`);
+  };
 
-   const load = async () => {
-      setLoading(true);
-      try {
-        await initCsrf();
-        const res = await get_departments();
-        const arr = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setRowsRaw(arr);
-        setErr(null);
-      } catch (e) {
-        console.error(e);
-        setErr("Failed to load Users");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-const handleDelete = async (id) => {
-    if (!id) return alert("Missing user id.");
-    if (!window.confirm("Delete this user?")) return;
+  const load = async () => {
+    setLoading(true);
     try {
-      await initCsrf();          
-      await delete_department(id);   
-      await load();              
+      await initCsrf();
+      const [listRes, totalRes, newRes] = await Promise.all([
+        get_departments(),
+        get_total_departments(),
+        get_new_department(),
+      ]);
+
+      const list = Array.isArray(listRes.data)
+        ? listRes.data
+        : listRes.data?.data || [];
+      setRowsRaw(list);
+      setTotalDepts(
+        typeof totalRes.data === "number"
+          ? totalRes.data
+          : totalRes.data?.total ??
+              totalRes.data?.total_departments ??
+              list.length
+      );
+      setNewDeptsThisMonth(
+        typeof newRes.data === "number"
+          ? newRes.data
+          : newRes.data?.count ?? newRes.data?.new_departments ?? 0
+      );
+      setErr(null);
+    } catch (e) {
+      console.error(e);
+      setErr("Failed to load Departments");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) return alert("Missing department id.");
+    if (!window.confirm("Delete this department?")) return;
+    try {
+      await initCsrf();
+      await delete_department(id);
+      await load();
     } catch (e) {
       console.error(e);
       alert(e?.response?.data?.message || "Delete failed.");
@@ -152,17 +197,44 @@ const handleDelete = async (id) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-neutral-900/60 border-neutral-800">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-neutral-400">
-              Total Departments
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">
-            {rows.length}
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">
+            Total Departments
+          </div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {totalDepts?.toLocaleString?.() ?? totalDepts}
+          </div>
+        </div>
+
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">New this month</div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {newDeptsThisMonth?.toLocaleString?.() ?? newDeptsThisMonth}
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -221,9 +293,11 @@ const handleDelete = async (id) => {
           </Select>
         </div>
 
-         <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button
-            onClick={() => navigate("/super_dashboard/department/CreateDepartment")}
+            onClick={() =>
+              navigate("/super_dashboard/department/CreateDepartment")
+            }
             className="bg-neutral-800 hover:bg-neutral-700"
           >
             <Plus className="mr-2 h-4 w-4" />

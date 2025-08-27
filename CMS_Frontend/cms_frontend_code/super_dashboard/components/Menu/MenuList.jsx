@@ -74,14 +74,6 @@ const totalMenusDerived = useMemo(() => rowsRaw.length, [rowsRaw]);
 const totalMenusDisplay =
     totalMenusDerived > 0 ? totalMenusDerived : totalMenu;
 
-const cardsMemo = useMemo(
-   () => [
-     { title: "New Menus This Month", value: String(newMenus) },
-     { title: "Total Menus", value: String(totalMenusDisplay) },
-   ],
-   [newMenus, totalMenusDisplay]
- );
-
 useEffect(() => {
     get_new_menus()
       .then((res) => setNewMenus(res?.data?.count ?? 0))
@@ -203,17 +195,46 @@ useEffect(() => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="grid grid-cols-12 gap-4 mb-4">
-       {cardsMemo.map(({ title, value }, i) => (
-         <div
-           key={i}
-           className="col-span-12 sm:col-span-6 lg:col-span-3 rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 shadow-sm"
-         >
-           <div className="text-sm text-neutral-400">{title}</div>
-           <div className="mt-1 text-2xl font-semibold tracking-tight">{value}</div>
-         </div>
-       ))}
-     </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">
+            Total Menus
+          </div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {totalMenusDisplay?.toLocaleString?.() ?? totalMenusDisplay}
+          </div>
+        </div>
+
+        <div
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-neutral-900 to-neutral-950 p-6 ring-1 ring-white/10"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), 0 20px 50px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+            <div className="absolute -bottom-24 -right-16 h-48 w-48 rounded-full bg-white/5 blur-3xl" />
+          </div>
+
+          <div className="text-[0.95rem] text-neutral-300">New this month</div>
+          <div className="mt-2 text-4xl font-semibold tracking-tight text-white">
+            {newMenus?.toLocaleString?.() ?? newMenus}
+          </div>
+        </div>
+      </div>
+      
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
