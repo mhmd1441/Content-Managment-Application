@@ -145,26 +145,40 @@ class ActivityController extends Controller
                 'left_at'      => 'nullable|date',
             ]);
 
-            $pv = PageView::where('id', $req->page_view_id)->first();
-            if (!$pv) return response()->json(['ok' => true]); // idempotent
+            // Load PV + verify user owns the session
+            $pv = PageView::find($req->page_view_id);
+            if (!$pv) return response()->json(['ok' => true]);
 
-            $s = ActivitySession::where('id', $pv->session_id)
-                ->where('user_id', $user->id)
-                ->first();
-            if (!$s) return response()->json(['ok' => true]); // idempotent
+            $session = ActivitySession::where('id', $pv->session_id)
+                ->where('user_id', $user->id)->first();
+            if (!$session) return response()->json(['ok' => true]);
 
-            if ($pv->left_at === null) {
-                $left = $req->left_at ? \Carbon\Carbon::parse($req->left_at) : now();
-                $pv->left_at = $left;
-                $pv->duration_seconds = max(0, $left->diffInSeconds($pv->entered_at));
-                $pv->save();
+            // Pick the effective left_at
+            $left = $req->left_at ? \Carbon\Carbon::parse($req->left_at) : now();
+            // Use the newer of existing left_at and request left_at
+            if ($pv->left_at && $left->lt(\Carbon\Carbon::parse($pv->left_at))) {
+                $left = \Carbon\Carbon::parse($pv->left_at);
             }
+
+            // *** ATOMIC DB-SIDE COMPUTE (PostgreSQL) ***
+            // duration_seconds = seconds_between(left_at, entered_at)
+            \DB::update(
+                "UPDATE page_views
+             SET left_at = ?,
+                 duration_seconds = GREATEST(
+                   0, EXTRACT(EPOCH FROM (?::timestamptz - entered_at))::int
+                 )
+             WHERE id = ?",
+                [$left, $left, $pv->id]
+            );
+
             return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
             \Log::error('endPageView failed', ['msg' => $e->getMessage()]);
             return response()->json(['error' => 'pageview_end_failed', 'message' => $e->getMessage()], 500);
         }
     }
+
 
 
     public function sessionsByRole(Request $req)
@@ -367,6 +381,70 @@ class ActivityController extends Controller
             'start'    => $start->toDateString(),
             'end'      => $end->toDateString(),
         ]);
+    }
+    public function dashboardVisits(Request $request)
+    {
+        $months = max(1, min(24, (int) $request->query('months', 6)));
+        // metric=users|sessions|pageviews (default: users = distinct people)
+        $metric = $request->query('metric', 'users');
+
+        $start = now()->startOfMonth()->subMonths($months - 1);
+        $end   = now()->endOfMonth();
+
+        // Labels & YM keys
+        $labels = []; $ymKeys = [];
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $labels[] = $cursor->format('M');      // Jan, Feb, ...
+            $ymKeys[] = $cursor->format('Y-m');    // 2025-08
+            $cursor->addMonth();
+        }
+        $ymIndex = array_flip($ymKeys);
+
+        // Map each PV (or session) to a dashboard + month + owner
+        $base = DB::table('page_views as pv')
+            ->join('activity_sessions as s', 's.id', '=', 'pv.session_id')
+            ->selectRaw("
+            CASE
+              WHEN s.parent_path = '/super_dashboard'    OR pv.path LIKE '/super_dashboard%'    THEN 'super'
+              WHEN s.parent_path = '/business_dashboard' OR pv.path LIKE '/business_dashboard%' THEN 'business'
+              WHEN s.parent_path = '/user_dashboard'     OR pv.path LIKE '/user_dashboard%'     THEN 'user'
+              ELSE NULL
+            END AS dashboard,
+            to_char(date_trunc('month', COALESCE(pv.entered_at, s.started_at)), 'YYYY-MM') as ym,
+            s.user_id,
+            s.id as session_id
+        ")
+            ->whereBetween(DB::raw("COALESCE(pv.entered_at, s.started_at)"), [$start, $end]);
+
+        // Aggregate per requested metric
+        $rows = match ($metric) {
+            'sessions'  => DB::query()->fromSub($base, 'b')
+                ->selectRaw("dashboard, ym, COUNT(DISTINCT session_id)::int as c")
+                ->whereNotNull('dashboard')
+                ->groupBy('dashboard','ym')->get(),
+            'pageviews' => DB::query()->fromSub($base, 'b')
+                ->selectRaw("dashboard, ym, COUNT(*)::int as c")
+                ->whereNotNull('dashboard')
+                ->groupBy('dashboard','ym')->get(),
+            default     => DB::query()->fromSub($base, 'b') // users
+            ->selectRaw("dashboard, ym, COUNT(DISTINCT user_id)::int as c")
+                ->whereNotNull('dashboard')
+                ->groupBy('dashboard','ym')->get(),
+        };
+
+        $series = [
+            'super'    => array_fill(0, count($labels), 0),
+            'business' => array_fill(0, count($labels), 0),
+            'user'     => array_fill(0, count($labels), 0),
+        ];
+
+        foreach ($rows as $r) {
+            if (!isset($ymIndex[$r->ym])) continue;
+            $series[$r->dashboard][$ymIndex[$r->ym]] = (int) $r->c;
+        }
+
+        return response()->json(compact('labels','series'));
     }
 
 

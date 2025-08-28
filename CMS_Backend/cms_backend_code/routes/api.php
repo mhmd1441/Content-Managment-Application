@@ -69,6 +69,6 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class])->group(function ()
         Route::get('/activity/analytics/sessions-by-role', [ActivityController::class, 'sessionsByRole']);
         Route::get('/activity/table', [ActivityController::class, 'sessionsTable']);
 
-
+        Route::get('/metrics/dashboard-visits', [ActivityController::class, 'dashboardVisits']);
     });
 });
