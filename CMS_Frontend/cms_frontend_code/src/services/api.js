@@ -33,7 +33,7 @@ export const get_total_users = () => api.get("/api/get_total_users");
 
 
 export const getMenus = () => api.get("/api/get_menus");
-export const show_menu = (id) => api.get(`/api/get_menus/${id}`);
+export const show_menu = (id) => api.get(`/api/get_menu/${id}`);
 export const save_menu = (payload) => api.post("/api/save_menu", payload);
 export const update_menu = (id, payload) => api.put(`/api/update_menu/${id}`, payload);
 export const delete_menu = (id) => api.delete(`/api/delete_menu/${id}`);
@@ -67,3 +67,10 @@ export const activity_pageview_end  = (payload) => api.post("/api/activity/pagev
 export const activity_session_end   = (payload) => api.post("/api/activity/session/end", payload);
 export const analytics_sessions_by_role = (params) =>api.get("/api/activity/analytics/sessions-by-role", { params });
 export const activity_sessions_table = (params) =>api.get("/api/activity/table", { params });
+
+export async function get_dashboard_visits(months = 6, metric = 'users') {
+  const { data } = await api.get('/api/metrics/dashboard-visits', {
+    params: { months, metric },
+  });
+  return data;
+}

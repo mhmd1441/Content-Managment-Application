@@ -1,80 +1,106 @@
-import * as React from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { BarChart } from '@mui/x-charts/BarChart';
-import { useTheme } from '@mui/material/styles';
+import * as React from "react";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { useTheme } from "@mui/material/styles";
+import { get_dashboard_visits } from "@/services/api.js";
 
 export default function PageViewsBarChart() {
   const theme = useTheme();
-  const colorPalette = [
-    (theme.vars || theme).palette.primary.dark,
-    (theme.vars || theme).palette.primary.main,
-    (theme.vars || theme).palette.primary.light,
-  ];
+
+  const colors = {
+    super: theme.palette.primary.main, 
+    business: theme.palette.success.main, 
+    user: theme.palette.warning.main,
+  };
+
+  const [labels, setLabels] = React.useState([]);
+  const [series, setSeries] = React.useState({
+    super: [],
+    business: [],
+    user: [],
+  });
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await get_dashboard_visits(6);
+        if (!mounted) return;
+        setLabels(data.labels);
+        setSeries(data.series);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
-    <Card variant="outlined" sx={{ width: '100%' }}>
+    <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
-          Page views and downloads
+          Page visits
         </Typography>
-        <Stack sx={{ justifyContent: 'space-between' }}>
-          <Stack
-            direction="row"
-            sx={{
-              alignContent: { xs: 'center', sm: 'flex-start' },
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
+        <Stack sx={{ justifyContent: "space-between" }}>
+          <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
             <Typography variant="h4" component="p">
               1.3M
             </Typography>
             <Chip size="small" color="error" label="-8%" />
           </Stack>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Page views and downloads for the last 6 months
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            Visits by dashboard for the last 6 months
           </Typography>
         </Stack>
+
         <BarChart
+          loading={loading}
           borderRadius={8}
-          colors={colorPalette}
           xAxis={[
             {
-              scaleType: 'band',
-              categoryGapRatio: 0.5,
-              data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+              scaleType: "band",
+              categoryGapRatio: 0.4,
+              data: labels,
               height: 24,
             },
           ]}
-          yAxis={[{ width: 50 }]}
+          yAxis={[
+            {
+              min: 0,
+              max: 50,
+              tickMinStep: 5,
+            },
+          ]}
           series={[
             {
-              id: 'page-views',
-              label: 'Page views',
-              data: [2234, 3872, 2998, 4125, 3357, 2789, 2998],
-              stack: 'A',
+              id: "super",
+              label: "Super dashboard",
+              data: series.super,
+              color: colors.super,
             },
             {
-              id: 'downloads',
-              label: 'Downloads',
-              data: [3098, 4215, 2384, 2101, 4752, 3593, 2384],
-              stack: 'A',
+              id: "business",
+              label: "Business dashboard",
+              data: series.business,
+              color: colors.business,
             },
             {
-              id: 'conversions',
-              label: 'Conversions',
-              data: [4051, 2275, 3129, 4693, 3904, 2038, 2275],
-              stack: 'A',
+              id: "user",
+              label: "User dashboard",
+              data: series.user,
+              color: colors.user,
             },
           ]}
           height={250}
           margin={{ left: 0, right: 0, top: 20, bottom: 0 }}
           grid={{ horizontal: true }}
-          hideLegend
         />
       </CardContent>
     </Card>

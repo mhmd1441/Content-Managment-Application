@@ -28,33 +28,29 @@ function daysAgoISO(n) {
 }
 
 export default function SessionsTable({ parentPath = null }) {
-  const [start, setStart] = React.useState(daysAgoISO(6)); // default last 7 days
+  const [start, setStart] = React.useState(daysAgoISO(6));
   const [end, setEnd] = React.useState(todayISO());
   const [role, setRole] = React.useState("all");
-  const [status, setStatus] = React.useState("all"); // active|inactive|all
+  const [status, setStatus] = React.useState("all");
   const [q, setQ] = React.useState("");
 
-  // table state
   const [rows, setRows] = React.useState([]);
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(10);
   const [total, setTotal] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
 
-  // clamp date range to 30 days max on any change
   function clampRange(newStart, newEnd) {
     const sd = new Date(newStart);
     const ed = new Date(newEnd);
     const ms = 30 * 24 * 3600 * 1000;
     if (ed - sd > ms) {
-      // snap start to (end - 29d)
       const s2 = new Date(ed.getTime() - (29 * 24 * 3600 * 1000));
       return [s2.toISOString().slice(0,10), newEnd];
     }
     return [newStart, newEnd];
   }
 
-  // debounced search typing
   const qRef = React.useRef(q);
   React.useEffect(() => { qRef.current = q; }, [q]);
 
@@ -80,16 +76,12 @@ export default function SessionsTable({ parentPath = null }) {
     }
   }
 
-  // refetch when filters change
   React.useEffect(() => {
-    // reset to first page on filter change
     setPage(1);
     const t = setTimeout(() => fetchRows(1, perPage), 300);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [start, end, role, status, q, parentPath]);
 
-  // refetch when page/perPage changes
   React.useEffect(() => { fetchRows(page, perPage); /* eslint-disable-next-line */ }, [page, perPage]);
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
